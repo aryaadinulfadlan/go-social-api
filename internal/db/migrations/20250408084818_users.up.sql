@@ -1,0 +1,11 @@
+CREATE EXTENSION IF NOT EXISTS CITEXT;
+
+CREATE TABLE IF NOT EXISTS users (
+    "id" UUID PRIMARY KEY,
+    "name" VARCHAR(20) NOT NULL,
+    "username" CITEXT UNIQUE NOT NULL,
+    "email" CITEXT UNIQUE NOT NULL,
+    "password" BYTEA NOT NULL,
+    "created_at" TIMESTAMPTZ,
+    "updated_at" TIMESTAMPTZ
+);

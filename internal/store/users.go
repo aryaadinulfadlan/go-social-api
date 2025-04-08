@@ -19,6 +19,15 @@ type User struct {
 	UpdatedAt time.Time
 	Posts     []Post
 }
+type UserResponse struct {
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
 
 type UserStore struct {
 	db *gorm.DB
