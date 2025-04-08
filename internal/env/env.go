@@ -1,6 +1,8 @@
 package env
 
 import (
+	"log"
+
 	"github.com/spf13/viper"
 )
 
@@ -17,7 +19,7 @@ func GetEnv() Config {
 	config.AddConfigPath("../../")
 	err := config.ReadInConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal("Cannot load env file:", err)
 	}
 	return Config{
 		ADDR:         config.GetString("ADDR"),
