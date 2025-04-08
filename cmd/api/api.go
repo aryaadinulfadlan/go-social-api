@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -14,6 +15,7 @@ type Config struct {
 }
 type Application struct {
 	Config
+	Store store.Storage
 }
 
 func (app *Application) Mount() *chi.Mux {
