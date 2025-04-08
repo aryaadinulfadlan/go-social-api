@@ -10,8 +10,15 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+type DBConfig struct {
+	DATABASE_URL string
+	MaxOpenConns int
+	MaxIdleConns int
+	MaxIdleTime  string
+}
 type Config struct {
 	Addr string
+	DB   DBConfig
 }
 type Application struct {
 	Config
