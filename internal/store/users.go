@@ -10,23 +10,14 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	Name      string
-	Username  string `gorm:"type:citext;unique"`
-	Email     string `gorm:"type:citext;unique"`
-	Password  string `gorm:"type:bytea"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Posts     []Post
-}
-type UserResponse struct {
-	Id        uuid.UUID `json:"id"`
+	Id        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
 	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	Username  string    `gorm:"type:citext;unique" json:"username"`
+	Email     string    `gorm:"type:citext;unique" json:"email"`
+	Password  string    `gorm:"type:bytea" json:"-"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Posts     []Post    `json:"posts,omitempty"`
 }
 
 type UserStore struct {

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,8 +35,17 @@ func (app *Application) Mount() *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		helpers.WriteErrorResponse(w, http.StatusNotFound, "NOT FOUND", fmt.Sprintf("Route %s %s is not exists", r.Method, r.URL.Path))
+	})
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		helpers.WriteErrorResponse(w, http.StatusMethodNotAllowed, "METHOD NOT ALLOWED", fmt.Sprintf("%s %s is not valid", r.Method, r.URL.Path))
+	})
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/test", app.Test)
+		r.Route("/posts", func(r chi.Router) {
+			r.Post("/", app.CreatePostHandler)
+		})
 	})
 	return r
 }

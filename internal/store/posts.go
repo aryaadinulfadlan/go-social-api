@@ -6,27 +6,24 @@ import (
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
 type Post struct {
-	Id        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	UserId    uuid.UUID `gorm:"type:uuid"`
-	Title     string
-	Content   string
-	Tags      []string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	User      User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Id        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
+	UserId    uuid.UUID      `gorm:"type:uuid" json:"user_id"`
+	Title     string         `json:"title"`
+	Content   string         `json:"content"`
+	Tags      pq.StringArray `gorm:"type:text[]" json:"tags"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	User      *User          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
 }
-type PostResponse struct {
-	Id        uuid.UUID `json:"id"`
-	UserId    uuid.UUID `json:"user_id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	Tags      []string  `json:"tags"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+
+func (post *Post) BeforeCreate(db *gorm.DB) (err error) {
+	post.Id = uuid.New()
+	return
 }
 
 type PostStore struct {

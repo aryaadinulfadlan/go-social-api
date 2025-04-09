@@ -19,14 +19,16 @@ func OpenConnection(dbUrl string, maxOpenConns int, maxIdleConns int, maxIdleTim
 		// IMPLEMENT LAZY RESULTS USING ROWS() INSTEAD OF FIND() - JIKA DATA BESAR
 		// IMPLEMENT TABLE NORMALIZATION (TABLE SPLITTING)
 	})
-	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	sqlDB, err := db.DB()
-	duration, err := time.ParseDuration(maxIdleTime)
-
 	if err != nil {
 		return nil, err
 	}
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+	duration, _ := time.ParseDuration(maxIdleTime)
 	sqlDB.SetMaxOpenConns(maxOpenConns)
 	sqlDB.SetMaxIdleConns(maxIdleConns)
 	sqlDB.SetConnMaxIdleTime(duration)
