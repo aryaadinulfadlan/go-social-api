@@ -35,3 +35,11 @@ func (post_store *PostStore) Create(ctx context.Context, post *Post) error {
 	helpers.PanicIfError(err)
 	return nil
 }
+func (post_store *PostStore) GetById(ctx context.Context, postId uuid.UUID) (*Post, error) {
+	var post Post
+	err := post_store.db.WithContext(ctx).Take(&post, "id = ?", postId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &post, nil
+}
