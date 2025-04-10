@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -26,6 +25,5 @@ type UserStore struct {
 
 func (user_store *UserStore) Create(ctx context.Context, user *User) error {
 	err := user_store.db.WithContext(ctx).Create(&user).Error
-	helpers.PanicIfError(err)
-	return nil
+	return err
 }

@@ -6,6 +6,12 @@ import (
 	"net/http"
 )
 
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
 func ReadFromRequestBody(r *http.Request, payload any) error {
 	if r.Body == nil {
 		return fmt.Errorf("missing body request")
@@ -26,7 +32,6 @@ func WriteErrorResponse(w http.ResponseWriter, code int, status string, message 
 		Status:  status,
 	}
 	WriteToResponseBody(w, code, errorResponse)
-	return
 }
 
 func JSONFormatting(data any) {

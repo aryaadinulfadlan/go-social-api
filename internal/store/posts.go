@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
@@ -32,7 +31,9 @@ type PostStore struct {
 
 func (post_store *PostStore) Create(ctx context.Context, post *Post) error {
 	err := post_store.db.WithContext(ctx).Create(&post).Error
-	helpers.PanicIfError(err)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (post_store *PostStore) GetById(ctx context.Context, postId uuid.UUID) (*Post, error) {

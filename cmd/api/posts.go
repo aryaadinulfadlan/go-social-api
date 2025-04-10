@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -22,7 +21,8 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 	var payload CreatePostPayload
 	err := helpers.ReadFromRequestBody(r, &payload)
 	if err != nil {
-		helpers.WriteErrorResponse(w, http.StatusBadRequest, internal.StatusBadRequest, "Invalid JSON Body")
+		app.BadRequestError(w, "Invalid JSON Body")
+		return
 	}
 	user_id, _ := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
 	post := store.Post{
@@ -34,7 +34,8 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	err = app.Store.Posts.Create(ctx, &post)
 	if err != nil {
-		helpers.WriteErrorResponse(w, http.StatusInternalServerError, internal.StatusInternalServerError, err.Error())
+		app.InternalServerError(w, err.Error())
+		return
 	}
 	helpers.WriteToResponseBody(w, http.StatusCreated, post)
 	// helpers.JSONFormatting(post)
@@ -43,17 +44,17 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	postId, parse_err := uuid.Parse(chi.URLParam(r, "postId"))
 	if parse_err != nil {
-		helpers.WriteErrorResponse(w, http.StatusBadRequest, internal.StatusBadRequest, "Invalid URL Parameters")
+		app.BadRequestError(w, "Invalid URL Parameters")
 		return
 	}
 	ctx := r.Context()
 	post_data, post_err := app.Store.Posts.GetById(ctx, postId)
 	if post_err != nil {
 		if errors.Is(post_err, gorm.ErrRecordNotFound) {
-			helpers.WriteErrorResponse(w, http.StatusNotFound, internal.StatusNotFound, post_err.Error())
+			app.NotFoundError(w, post_err.Error())
 			return
 		}
-		helpers.WriteErrorResponse(w, http.StatusInternalServerError, internal.StatusInternalServerError, post_err.Error())
+		app.InternalServerError(w, post_err.Error())
 		return
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, post_data)
