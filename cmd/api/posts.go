@@ -5,16 +5,19 @@ import (
 	"net/http"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
+	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
+	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type CreatePostPayload struct {
-	Title   string   `json:"title" validate:"required,max=20"`
-	Content string   `json:"content" validate:"required,max=100"`
-	Tags    []string `json:"tags"`
+	Title   string   `json:"title" validate:"required,min=4,max=10"`
+	Content string   `json:"content" validate:"required,min=8,max=20"`
+	Tags    []string `json:"tags" validate:"required,notempty,dive,required,min=10,max=20"`
 }
 
 func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +26,23 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.BadRequestError(w, "Invalid JSON Body")
 		return
+	}
+	if err := Validate.Struct(payload); err != nil {
+		var validation_errors validator.ValidationErrors
+		if errors.As(err, &validation_errors) {
+			error_messages := make([]string, len(validation_errors))
+			for idx, e := range validation_errors {
+				message := GetValidationErrorMessage(e.Tag(), e.Field(), e.Param())
+				error_messages[idx] = message
+			}
+			errorResponse := model.WebResponse{
+				Code:   http.StatusBadRequest,
+				Status: internal.StatusBadRequest,
+				Data:   error_messages,
+			}
+			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+			return
+		}
 	}
 	user_id, _ := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
 	post := store.Post{
