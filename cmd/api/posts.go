@@ -57,8 +57,12 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		app.InternalServerError(w, err.Error())
 		return
 	}
-	helpers.WriteToResponseBody(w, http.StatusCreated, post)
-	// helpers.JSONFormatting(post)
+	web_response := model.WebResponse{
+		Code:   http.StatusCreated,
+		Status: internal.StatusCreated,
+		Data:   post,
+	}
+	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
 }
 
 func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +81,10 @@ func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		app.InternalServerError(w, post_err.Error())
 		return
 	}
-	helpers.WriteToResponseBody(w, http.StatusOK, post_data)
-	// helpers.JSONFormatting(post)
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   post_data,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }

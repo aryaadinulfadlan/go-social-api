@@ -6,4 +6,6 @@ const (
 	StatusNotFound            = "NOT FOUND"
 	StatusUnauthorized        = "UNAUTHORIZED"
 	StatusMethodNotAllowed    = "METHOD NOT ALLOWED"
+	StatusCreated             = "CREATED"
+	StatusOK                  = "OK"
 )
