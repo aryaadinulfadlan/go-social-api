@@ -17,8 +17,10 @@ type Storage struct {
 	}
 	Users interface {
 		Create(context.Context, *User) error
+		CheckUserExists(context.Context, uuid.UUID) (*User, error)
 	}
 	Comments interface {
+		CreateComment(context.Context, *Comment) error
 	}
 }
 

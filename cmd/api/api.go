@@ -32,7 +32,7 @@ func (app *Application) Mount() *chi.Mux {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middleware.Timeout(3 * time.Second))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		app.NotFoundError(w, fmt.Sprintf("Route %s %s is not exists", r.Method, r.URL.Path))
@@ -47,6 +47,9 @@ func (app *Application) Mount() *chi.Mux {
 			r.Get("/{postId}", app.GetPostHandler)
 			r.Patch("/{postId}", app.UpdatePostHandler)
 			r.Delete("/{postId}", app.DeletePostHandler)
+		})
+		r.Route("/comments", func(r chi.Router) {
+			r.Post("/", app.CreateCommentHandler)
 		})
 	})
 	return r

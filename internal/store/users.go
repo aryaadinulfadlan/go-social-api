@@ -20,10 +20,23 @@ type User struct {
 	Comments  []Comment `json:"comments,omitempty"`
 }
 
+func (user *User) BeforeCreate(db *gorm.DB) (err error) {
+	user.Id = uuid.New()
+	return
+}
+
 type UserStore struct {
 	db *gorm.DB
 }
 
+func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UUID) (*User, error) {
+	var user User
+	err := user_store.db.WithContext(ctx).Take(&user, "id = ?", userId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
 func (user_store *UserStore) Create(ctx context.Context, user *User) error {
 	err := user_store.db.WithContext(ctx).Create(&user).Error
 	return err

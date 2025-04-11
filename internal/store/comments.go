@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,4 +26,12 @@ func (comment *Comment) BeforeCreate(db *gorm.DB) (err error) {
 
 type CommentStore struct {
 	db *gorm.DB
+}
+
+func (comment_store *CommentStore) CreateComment(ctx context.Context, comment *Comment) error {
+	err := comment_store.db.WithContext(ctx).Create(&comment).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
