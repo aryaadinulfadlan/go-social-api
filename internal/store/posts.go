@@ -18,6 +18,7 @@ type Post struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	User      *User          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
+	Comments  []Comment      `json:"comments,omitempty"`
 }
 
 func (post *Post) BeforeCreate(db *gorm.DB) (err error) {
@@ -38,7 +39,7 @@ func (post_store *PostStore) Create(ctx context.Context, post *Post) error {
 }
 func (post_store *PostStore) GetById(ctx context.Context, postId uuid.UUID) (*Post, error) {
 	var post Post
-	err := post_store.db.WithContext(ctx).Take(&post, "id = ?", postId).Error
+	err := post_store.db.WithContext(ctx).Preload("User").Preload("Comments").Take(&post, "id = ?", postId).Error
 	if err != nil {
 		return nil, err
 	}

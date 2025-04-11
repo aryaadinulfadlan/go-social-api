@@ -15,11 +15,14 @@ type Storage struct {
 	Users interface {
 		Create(context.Context, *User) error
 	}
+	Comments interface {
+	}
 }
 
 func NewStorage(db *gorm.DB) *Storage {
 	return &Storage{
-		Posts: &PostStore{db},
-		Users: &UserStore{db},
+		Posts:    &PostStore{db},
+		Users:    &UserStore{db},
+		Comments: &CommentStore{db},
 	}
 }

@@ -17,6 +17,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Posts     []Post    `json:"posts,omitempty"`
+	Comments  []Comment `json:"comments,omitempty"`
 }
 
 type UserStore struct {

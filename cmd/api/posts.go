@@ -17,7 +17,7 @@ import (
 type CreatePostPayload struct {
 	Title   string   `json:"title" validate:"required,min=4,max=10"`
 	Content string   `json:"content" validate:"required,min=8,max=20"`
-	Tags    []string `json:"tags" validate:"required,notempty,dive,required,min=10,max=20"`
+	Tags    []string `json:"tags" validate:"required,notempty,dive,required,min=4,max=20"`
 }
 
 func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
-	user_id, _ := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
+	user_id, _ := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
 	post := store.Post{
 		UserId:  user_id,
 		Title:   payload.Title,
