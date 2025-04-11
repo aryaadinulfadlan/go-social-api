@@ -46,6 +46,7 @@ func (app *Application) Mount() *chi.Mux {
 			r.Post("/", app.CreatePostHandler)
 			r.Get("/{postId}", app.GetPostHandler)
 			r.Patch("/{postId}", app.UpdatePostHandler)
+			r.Delete("/{postId}", app.DeletePostHandler)
 		})
 	})
 	return r

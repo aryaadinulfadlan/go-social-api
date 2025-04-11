@@ -30,14 +30,14 @@ type PostStore struct {
 	db *gorm.DB
 }
 
-func (post_store *PostStore) Create(ctx context.Context, post *Post) error {
+func (post_store *PostStore) CreatePost(ctx context.Context, post *Post) error {
 	err := post_store.db.WithContext(ctx).Create(&post).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (post_store *PostStore) GetById(ctx context.Context, postId uuid.UUID) (*Post, error) {
+func (post_store *PostStore) GetPost(ctx context.Context, postId uuid.UUID) (*Post, error) {
 	var post Post
 	err := post_store.db.WithContext(ctx).Preload("User").Preload("Comments").Take(&post, "id = ?", postId).Error
 	if err != nil {
@@ -53,7 +53,7 @@ func (post_store *PostStore) CheckPostExists(ctx context.Context, postId uuid.UU
 	}
 	return &post, nil
 }
-func (post_store *PostStore) UpdateById(ctx context.Context, post *Post) (*Post, error) {
+func (post_store *PostStore) UpdatePost(ctx context.Context, post *Post) (*Post, error) {
 	err := post_store.db.WithContext(ctx).Model(&Post{}).
 		Where("id = ?", post.Id).
 		Updates(Post{
@@ -65,4 +65,12 @@ func (post_store *PostStore) UpdateById(ctx context.Context, post *Post) (*Post,
 		return nil, err
 	}
 	return post, nil
+}
+func (post_store *PostStore) DeletePost(ctx context.Context, postId uuid.UUID) error {
+	var post Post
+	err := post_store.db.WithContext(ctx).Where("id = ?", postId).Delete(&post).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

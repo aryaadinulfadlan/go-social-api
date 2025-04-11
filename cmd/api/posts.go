@@ -46,7 +46,7 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		Tags:    payload.Tags,
 	}
 	ctx := r.Context()
-	err = app.Store.Posts.Create(ctx, &post)
+	err = app.Store.Posts.CreatePost(ctx, &post)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return
@@ -66,7 +66,7 @@ func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	post_data, post_err := app.Store.Posts.GetById(ctx, postId)
+	post_data, post_err := app.Store.Posts.GetPost(ctx, postId)
 	if post_err != nil {
 		if errors.Is(post_err, gorm.ErrRecordNotFound) {
 			app.NotFoundError(w, post_err.Error())
@@ -126,7 +126,7 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 	post.Title = payload.Title
 	post.Content = payload.Content
 	post.Tags = payload.Tags
-	post_data, post_err := app.Store.Posts.UpdateById(ctx, post)
+	post_data, post_err := app.Store.Posts.UpdatePost(ctx, post)
 	if post_err != nil {
 		app.InternalServerError(w, post_err.Error())
 		return
@@ -135,6 +135,35 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 		Code:   http.StatusOK,
 		Status: internal.StatusOK,
 		Data:   post_data,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}
+
+func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request) {
+	postId, parse_err := uuid.Parse(chi.URLParam(r, "postId"))
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid Post ID Parameters")
+		return
+	}
+	ctx := r.Context()
+	post, err := app.Store.Posts.CheckPostExists(ctx, postId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, err.Error())
+			return
+		}
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	err = app.Store.Posts.DeletePost(ctx, post.Id)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   "Resource deleted successfully.",
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }

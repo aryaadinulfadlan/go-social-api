@@ -9,10 +9,11 @@ import (
 
 type Storage struct {
 	Posts interface {
-		Create(context.Context, *Post) error
-		GetById(context.Context, uuid.UUID) (*Post, error)
+		CreatePost(context.Context, *Post) error
+		GetPost(context.Context, uuid.UUID) (*Post, error)
 		CheckPostExists(context.Context, uuid.UUID) (*Post, error)
-		UpdateById(context.Context, *Post) (*Post, error)
+		UpdatePost(context.Context, *Post) (*Post, error)
+		DeletePost(context.Context, uuid.UUID) error
 	}
 	Users interface {
 		Create(context.Context, *User) error
