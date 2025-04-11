@@ -45,6 +45,7 @@ func (app *Application) Mount() *chi.Mux {
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.CreatePostHandler)
 			r.Get("/{postId}", app.GetPostHandler)
+			r.Patch("/{postId}", app.UpdatePostHandler)
 		})
 	})
 	return r

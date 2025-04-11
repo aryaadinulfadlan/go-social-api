@@ -12,9 +12,9 @@ import (
 func OpenConnection(dbUrl string, maxOpenConns int, maxIdleConns int, maxIdleTime string) (*gorm.DB, error) {
 	dialect := postgres.Open(dbUrl)
 	db, err := gorm.Open(dialect, &gorm.Config{
-		Logger:                 logger.Default.LogMode(logger.Info),
-		SkipDefaultTransaction: true,
-		PrepareStmt:            true,
+		Logger: logger.Default.LogMode(logger.Info),
+		// SkipDefaultTransaction: true,
+		PrepareStmt: true,
 		// IMPLEMENT SELECT FIELD
 		// IMPLEMENT LAZY RESULTS USING ROWS() INSTEAD OF FIND() - JIKA DATA BESAR
 		// IMPLEMENT TABLE NORMALIZATION (TABLE SPLITTING)

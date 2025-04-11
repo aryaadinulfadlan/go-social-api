@@ -11,6 +11,8 @@ type Storage struct {
 	Posts interface {
 		Create(context.Context, *Post) error
 		GetById(context.Context, uuid.UUID) (*Post, error)
+		CheckPostExists(context.Context, uuid.UUID) (*Post, error)
+		UpdateById(context.Context, *Post) (*Post, error)
 	}
 	Users interface {
 		Create(context.Context, *User) error

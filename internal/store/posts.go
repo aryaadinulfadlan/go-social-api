@@ -45,3 +45,24 @@ func (post_store *PostStore) GetById(ctx context.Context, postId uuid.UUID) (*Po
 	}
 	return &post, nil
 }
+func (post_store *PostStore) CheckPostExists(ctx context.Context, postId uuid.UUID) (*Post, error) {
+	var post Post
+	err := post_store.db.WithContext(ctx).Take(&post, "id = ?", postId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &post, nil
+}
+func (post_store *PostStore) UpdateById(ctx context.Context, post *Post) (*Post, error) {
+	err := post_store.db.WithContext(ctx).Model(&Post{}).
+		Where("id = ?", post.Id).
+		Updates(Post{
+			Title:   post.Title,
+			Content: post.Content,
+			Tags:    post.Tags,
+		}).Error
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
+}
