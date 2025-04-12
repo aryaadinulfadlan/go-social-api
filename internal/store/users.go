@@ -18,6 +18,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Posts     []Post    `json:"posts,omitempty"`
 	Comments  []Comment `json:"comments,omitempty"`
+	Following []*User   `gorm:"many2many:user_followers;joinForeignKey:follower_id;joinReferences:following_id"`
+	Followers []*User   `gorm:"many2many:user_followers;joinForeignKey:following_id;joinReferences:follower_id"`
 }
 
 func (user *User) BeforeCreate(db *gorm.DB) (err error) {
@@ -48,4 +50,22 @@ func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UU
 		return nil, err
 	}
 	return &user, nil
+}
+func (user_store *UserStore) FollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
+	// err := user_store.db.WithContext(ctx).Select("id").Model(&User{Id: senderId}).Association("Following").Append(&User{Id: targetId})
+	err := user_store.db.WithContext(ctx).Table("user_followers").Create(map[string]any{
+		"follower_id":  senderId,
+		"following_id": targetId,
+	}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (user_store *UserStore) UnfollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
+	err := user_store.db.WithContext(ctx).Table("user_followers").Where("follower_id = ? AND following_id = ?", senderId, targetId).Delete(nil).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

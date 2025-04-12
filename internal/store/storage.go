@@ -19,6 +19,8 @@ type Storage struct {
 		CreateUser(context.Context, *User) error
 		GetUser(context.Context, uuid.UUID) (*User, error)
 		CheckUserExists(context.Context, uuid.UUID) (*User, error)
+		FollowUser(context.Context, uuid.UUID, uuid.UUID) error
+		UnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
 	}
 	Comments interface {
 		CreateComment(context.Context, *Comment) error

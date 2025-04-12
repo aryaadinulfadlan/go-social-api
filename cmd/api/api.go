@@ -50,6 +50,8 @@ func (app *Application) Mount() *chi.Mux {
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/{userId}", app.GetUserHandler)
+			r.Post("/{userId}/follow", app.FollowUserHandler)
+			r.Post("/{userId}/unfollow", app.UnfollowUserHandler)
 		})
 		r.Route("/comments", func(r chi.Router) {
 			r.Post("/", app.CreateCommentHandler)
