@@ -33,7 +33,10 @@ type UserStore struct {
 
 func (user_store *UserStore) CreateUser(ctx context.Context, user *User) error {
 	err := user_store.db.WithContext(ctx).Create(&user).Error
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*User, error) {
 	var user User
