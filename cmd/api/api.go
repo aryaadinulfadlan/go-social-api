@@ -48,6 +48,9 @@ func (app *Application) Mount() *chi.Mux {
 			r.Patch("/{postId}", app.UpdatePostHandler)
 			r.Delete("/{postId}", app.DeletePostHandler)
 		})
+		r.Route("/users", func(r chi.Router) {
+			r.Get("/{userId}", app.GetUserHandler)
+		})
 		r.Route("/comments", func(r chi.Router) {
 			r.Post("/", app.CreateCommentHandler)
 		})

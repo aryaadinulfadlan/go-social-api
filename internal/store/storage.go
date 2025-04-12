@@ -16,7 +16,8 @@ type Storage struct {
 		DeletePost(context.Context, uuid.UUID) error
 	}
 	Users interface {
-		Create(context.Context, *User) error
+		CreateUser(context.Context, *User) error
+		GetUser(context.Context, uuid.UUID) (*User, error)
 		CheckUserExists(context.Context, uuid.UUID) (*User, error)
 	}
 	Comments interface {

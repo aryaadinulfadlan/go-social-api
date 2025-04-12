@@ -29,7 +29,11 @@ type UserStore struct {
 	db *gorm.DB
 }
 
-func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UUID) (*User, error) {
+func (user_store *UserStore) CreateUser(ctx context.Context, user *User) error {
+	err := user_store.db.WithContext(ctx).Create(&user).Error
+	return err
+}
+func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*User, error) {
 	var user User
 	err := user_store.db.WithContext(ctx).Take(&user, "id = ?", userId).Error
 	if err != nil {
@@ -37,7 +41,11 @@ func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UU
 	}
 	return &user, nil
 }
-func (user_store *UserStore) Create(ctx context.Context, user *User) error {
-	err := user_store.db.WithContext(ctx).Create(&user).Error
-	return err
+func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UUID) (*User, error) {
+	var user User
+	err := user_store.db.WithContext(ctx).Take(&user, "id = ?", userId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
