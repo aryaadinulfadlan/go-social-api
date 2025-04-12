@@ -209,3 +209,60 @@ func (app *Application) UnfollowUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }
+
+func (app *Application) GetFollowingUserHandler(w http.ResponseWriter, r *http.Request) {
+	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid User ID Parameters")
+		return
+	}
+	ctx := r.Context()
+	user_data, user_err := app.Store.Users.CheckUserExists(ctx, userId)
+	if user_err != nil {
+		if errors.Is(user_err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, user_err.Error())
+			return
+		}
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	users, err := app.Store.Users.GetUsersFollowing(ctx, user_data.Id)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   users,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}
+func (app *Application) GetFollowersUserHandler(w http.ResponseWriter, r *http.Request) {
+	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid User ID Parameters")
+		return
+	}
+	ctx := r.Context()
+	user_data, user_err := app.Store.Users.CheckUserExists(ctx, userId)
+	if user_err != nil {
+		if errors.Is(user_err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, user_err.Error())
+			return
+		}
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	users, err := app.Store.Users.GetUsersFollowers(ctx, user_data.Id)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   users,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}

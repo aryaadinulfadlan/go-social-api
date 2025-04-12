@@ -18,8 +18,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Posts     []Post    `json:"posts,omitempty"`
 	Comments  []Comment `json:"comments,omitempty"`
-	Following []*User   `gorm:"many2many:user_followers;joinForeignKey:follower_id;joinReferences:following_id"`
-	Followers []*User   `gorm:"many2many:user_followers;joinForeignKey:following_id;joinReferences:follower_id"`
+	Following []*User   `gorm:"many2many:user_followers;joinForeignKey:follower_id;joinReferences:following_id" json:"following"`
+	Followers []*User   `gorm:"many2many:user_followers;joinForeignKey:following_id;joinReferences:follower_id" json:"followers"`
 }
 
 func (user *User) BeforeCreate(db *gorm.DB) (err error) {
@@ -40,7 +40,7 @@ func (user_store *UserStore) CreateUser(ctx context.Context, user *User) error {
 }
 func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*User, error) {
 	var user User
-	err := user_store.db.WithContext(ctx).Take(&user, "id = ?", userId).Error
+	err := user_store.db.WithContext(ctx).Preload("Following").Preload("Followers").Take(&user, "id = ?", userId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -71,4 +71,20 @@ func (user_store *UserStore) UnfollowUser(ctx context.Context, targetId uuid.UUI
 		return err
 	}
 	return nil
+}
+func (user_store *UserStore) GetUsersFollowing(ctx context.Context, userId uuid.UUID) ([]*User, error) {
+	var users []*User
+	err := user_store.db.Model(&User{Id: userId}).Association("Following").Find(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+func (user_store *UserStore) GetUsersFollowers(ctx context.Context, userId uuid.UUID) ([]*User, error) {
+	var users []*User
+	err := user_store.db.Model(&User{Id: userId}).Association("Followers").Find(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
