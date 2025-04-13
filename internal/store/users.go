@@ -54,35 +54,42 @@ func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UU
 	}
 	return &user, nil
 }
-func (user_store *UserStore) FollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
+func (user_store *UserStore) FollowUnfollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
 	// err := user_store.db.WithContext(ctx).Select("id").Model(&User{Id: senderId}).Association("Following").Append(&User{Id: targetId})
-	err := user_store.db.WithContext(ctx).Table("user_followers").Create(map[string]any{
-		"follower_id":  senderId,
-		"following_id": targetId,
-	}).Error
+	// relation := make(map[string]interface{})
+	var count int64
+	err := user_store.db.WithContext(ctx).
+		Table("user_followers").
+		Where("follower_id = ? AND following_id = ?", senderId, targetId).
+		Count(&count).Error
 	if err != nil {
 		return err
 	}
-	return nil
-}
-func (user_store *UserStore) UnfollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
-	err := user_store.db.WithContext(ctx).Table("user_followers").Where("follower_id = ? AND following_id = ?", senderId, targetId).Delete(nil).Error
-	if err != nil {
-		return err
+	if count > 0 {
+		err_delete := user_store.db.WithContext(ctx).
+			Table("user_followers").
+			Where("follower_id = ? AND following_id = ?", senderId, targetId).
+			Delete(nil).Error
+		if err_delete != nil {
+			return err_delete
+		}
+	} else {
+		err_insert := user_store.db.WithContext(ctx).
+			Table("user_followers").
+			Create(map[string]any{
+				"follower_id":  senderId,
+				"following_id": targetId,
+			}).Error
+		if err_insert != nil {
+			return err_insert
+		}
 	}
 	return nil
 }
-func (user_store *UserStore) GetUsersFollowing(ctx context.Context, userId uuid.UUID) ([]*User, error) {
+
+func (user_store *UserStore) GetConnections(ctx context.Context, userId uuid.UUID, actionType string) ([]*User, error) {
 	var users []*User
-	err := user_store.db.Model(&User{Id: userId}).Association("Following").Find(&users)
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-func (user_store *UserStore) GetUsersFollowers(ctx context.Context, userId uuid.UUID) ([]*User, error) {
-	var users []*User
-	err := user_store.db.Model(&User{Id: userId}).Association("Followers").Find(&users)
+	err := user_store.db.Model(&User{Id: userId}).Association(actionType).Find(&users)
 	if err != nil {
 		return nil, err
 	}

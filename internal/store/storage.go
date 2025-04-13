@@ -19,10 +19,8 @@ type Storage struct {
 		CreateUser(context.Context, *User) error
 		GetUser(context.Context, uuid.UUID) (*User, error)
 		CheckUserExists(context.Context, uuid.UUID) (*User, error)
-		FollowUser(context.Context, uuid.UUID, uuid.UUID) error
-		UnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
-		GetUsersFollowing(context.Context, uuid.UUID) ([]*User, error)
-		GetUsersFollowers(context.Context, uuid.UUID) ([]*User, error)
+		FollowUnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
+		GetConnections(context.Context, uuid.UUID, string) ([]*User, error)
 	}
 	Comments interface {
 		CreateComment(context.Context, *Comment) error
