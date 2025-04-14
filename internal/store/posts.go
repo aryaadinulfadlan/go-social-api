@@ -21,6 +21,12 @@ type Post struct {
 	Comments  []Comment      `json:"comments,omitempty"`
 }
 
+type PostWithMetadata struct {
+	Post
+	Username      string `json:"username"`
+	CommentsCount int64  `json:"comments_count"`
+}
+
 func (post *Post) BeforeCreate(db *gorm.DB) (err error) {
 	post.Id = uuid.New()
 	return
@@ -73,4 +79,25 @@ func (post_store *PostStore) DeletePost(ctx context.Context, postId uuid.UUID) e
 		return err
 	}
 	return nil
+}
+func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID) ([]*PostWithMetadata, error) {
+	var post_feed []*PostWithMetadata
+	err := post_store.db.WithContext(ctx).Raw(`
+		SELECT 
+			p.id, p.user_id, p.title, p.content, p.tags, p.created_at, p.updated_at,
+			u.username,
+			COUNT(c.id) AS comments_count
+		FROM posts p
+		LEFT JOIN comments c ON c.post_id = p.id
+		LEFT JOIN users u ON p.user_id = u.id
+		LEFT JOIN user_followers f ON f.following_id = p.user_id AND f.follower_id = $1
+		WHERE p.user_id = $1 OR f.follower_id IS NOT NULL
+		GROUP BY p.id, u.username
+		ORDER BY p.created_at DESC;
+
+	`, userId).Scan(&post_feed).Error
+	if err != nil {
+		return nil, err
+	}
+	return post_feed, nil
 }

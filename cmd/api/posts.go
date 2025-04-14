@@ -167,3 +167,24 @@ func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }
+
+func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Request) {
+	// userId, parse_err := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
+	userId, parse_err := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid Post ID Parameters")
+		return
+	}
+	ctx := r.Context()
+	feed, err := app.Store.Posts.GetPostFeed(ctx, userId)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   feed,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}
