@@ -169,22 +169,53 @@ func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Request) {
-	// userId, parse_err := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
-	userId, parse_err := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
+	// userId, parse_err := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
+	userId, parse_err := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
 	if parse_err != nil {
 		app.BadRequestError(w, "Invalid Post ID Parameters")
 		return
 	}
+	paginatedQuery := &store.PaginatedFeedQuery{
+		PerPage: 3,
+		Page:    1,
+		Sort:    "DESC",
+	}
+	paginatedQuery, err := paginatedQuery.Parse(r)
+	if err != nil {
+		app.BadRequestError(w, err.Error())
+		return
+	}
+	if err := Validate.Struct(paginatedQuery); err != nil {
+		var validation_errors validator.ValidationErrors
+		if errors.As(err, &validation_errors) {
+			error_messages := make([]string, len(validation_errors))
+			for idx, e := range validation_errors {
+				message := GetValidationErrorMessage(e.Tag(), e.Field(), e.Param())
+				error_messages[idx] = message
+			}
+			errorResponse := model.WebResponse{
+				Code:   http.StatusBadRequest,
+				Status: internal.StatusBadRequest,
+				Data:   error_messages,
+			}
+			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+			return
+		}
+	}
 	ctx := r.Context()
-	feed, err := app.Store.Posts.GetPostFeed(ctx, userId)
+	feed, total, err := app.Store.Posts.GetPostFeed(ctx, userId, paginatedQuery)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return
 	}
+	pagination := model.NewPaginationMeta(paginatedQuery.Page, paginatedQuery.PerPage, int(total))
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
 		Status: internal.StatusOK,
-		Data:   feed,
+		Data: model.PaginationResponse{
+			Items:      feed,
+			Pagination: pagination,
+		},
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }

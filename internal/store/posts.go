@@ -80,10 +80,19 @@ func (post_store *PostStore) DeletePost(ctx context.Context, postId uuid.UUID) e
 	}
 	return nil
 }
-func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID) ([]*PostWithMetadata, error) {
+func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, paginatedQuery *PaginatedFeedQuery) ([]*PostWithMetadata, int64, error) {
 	var post_feed []*PostWithMetadata
-	err := post_store.db.WithContext(ctx).Raw(`
-		SELECT 
+	var total int64
+	countQuery := `
+		SELECT COUNT(DISTINCT p.id)
+		FROM posts p
+		LEFT JOIN comments c ON c.post_id = p.id
+		LEFT JOIN users u ON p.user_id = u.id
+		LEFT JOIN user_followers f ON f.following_id = p.user_id AND f.follower_id = $1
+		WHERE p.user_id = $1 OR f.follower_id IS NOT NULL
+	`
+	feedQuery := `
+		SELECT
 			p.id, p.user_id, p.title, p.content, p.tags, p.created_at, p.updated_at,
 			u.username,
 			COUNT(c.id) AS comments_count
@@ -93,11 +102,19 @@ func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID) 
 		LEFT JOIN user_followers f ON f.following_id = p.user_id AND f.follower_id = $1
 		WHERE p.user_id = $1 OR f.follower_id IS NOT NULL
 		GROUP BY p.id, u.username
-		ORDER BY p.created_at DESC;
-
-	`, userId).Scan(&post_feed).Error
+		ORDER BY p.created_at ` + paginatedQuery.Sort + `
+		LIMIT $2 OFFSET $3;
+	`
+	err := post_store.db.WithContext(ctx).
+		Raw(countQuery, userId).Scan(&total).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return post_feed, nil
+	err = post_store.db.WithContext(ctx).
+		Raw(feedQuery, userId, paginatedQuery.PerPage, (paginatedQuery.Page-1)*paginatedQuery.PerPage).
+		Scan(&post_feed).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return post_feed, total, nil
 }

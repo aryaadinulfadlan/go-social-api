@@ -14,7 +14,7 @@ type Storage struct {
 		CheckPostExists(context.Context, uuid.UUID) (*Post, error)
 		UpdatePost(context.Context, *Post) (*Post, error)
 		DeletePost(context.Context, uuid.UUID) error
-		GetPostFeed(context.Context, uuid.UUID) ([]*PostWithMetadata, error)
+		GetPostFeed(context.Context, uuid.UUID, *PaginatedFeedQuery) ([]*PostWithMetadata, int64, error)
 	}
 	Users interface {
 		CreateUser(context.Context, *User) error
