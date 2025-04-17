@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 
+	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -14,7 +15,7 @@ type Storage struct {
 		CheckPostExists(context.Context, uuid.UUID) (*Post, error)
 		UpdatePost(context.Context, *Post) (*Post, error)
 		DeletePost(context.Context, uuid.UUID) error
-		GetPostFeed(context.Context, uuid.UUID, *PaginatedFeedQuery) ([]*PostWithMetadata, int64, error)
+		GetPostFeed(context.Context, uuid.UUID, *model.PostParams) ([]*PostWithMetadata, int64, error)
 	}
 	Users interface {
 		CreateUser(context.Context, *User) error

@@ -175,17 +175,17 @@ func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Reques
 		app.BadRequestError(w, "Invalid Post ID Parameters")
 		return
 	}
-	paginatedQuery := &store.PaginatedFeedQuery{
-		PerPage: 3,
+	params := &model.PostParams{
+		PerPage: 10,
 		Page:    1,
 		Sort:    "DESC",
 	}
-	paginatedQuery, err := paginatedQuery.Parse(r)
+	params, err := params.Parse(r)
 	if err != nil {
 		app.BadRequestError(w, err.Error())
 		return
 	}
-	if err := Validate.Struct(paginatedQuery); err != nil {
+	if err := Validate.Struct(params); err != nil {
 		var validation_errors validator.ValidationErrors
 		if errors.As(err, &validation_errors) {
 			error_messages := make([]string, len(validation_errors))
@@ -203,12 +203,12 @@ func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 	ctx := r.Context()
-	feed, total, err := app.Store.Posts.GetPostFeed(ctx, userId, paginatedQuery)
+	feed, total, err := app.Store.Posts.GetPostFeed(ctx, userId, params)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return
 	}
-	pagination := model.NewPaginationMeta(paginatedQuery.Page, paginatedQuery.PerPage, int(total))
+	pagination := model.NewPaginationMeta(params.Page, params.PerPage, int(total))
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
 		Status: internal.StatusOK,

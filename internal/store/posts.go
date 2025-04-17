@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
@@ -80,7 +82,7 @@ func (post_store *PostStore) DeletePost(ctx context.Context, postId uuid.UUID) e
 	}
 	return nil
 }
-func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, paginatedQuery *PaginatedFeedQuery) ([]*PostWithMetadata, int64, error) {
+func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, params *model.PostParams) ([]*PostWithMetadata, int64, error) {
 	var post_feed []*PostWithMetadata
 	var total int64
 	countQuery := `
@@ -89,8 +91,26 @@ func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, 
 		LEFT JOIN comments c ON c.post_id = p.id
 		LEFT JOIN users u ON p.user_id = u.id
 		LEFT JOIN user_followers f ON f.following_id = p.user_id AND f.follower_id = $1
-		WHERE p.user_id = $1 OR f.follower_id IS NOT NULL
+		WHERE (p.user_id = $1 OR f.follower_id IS NOT NULL)
 	`
+	countArgs := []any{userId}
+	countIndex := 2
+	if params.Search != "" {
+		countQuery += fmt.Sprintf("\nAND (p.title ILIKE $%d OR p.content ILIKE $%d)", countIndex, countIndex)
+		countArgs = append(countArgs, "%"+params.Search+"%")
+		countIndex++
+	}
+	if len(params.Tags) > 0 {
+		countQuery += fmt.Sprintf("\nAND p.tags && $%d::varchar[]", countIndex)
+		countArgs = append(countArgs, pq.Array(params.Tags))
+		countIndex++
+	}
+	err := post_store.db.WithContext(ctx).
+		Raw(countQuery, countArgs...).Scan(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
 	feedQuery := `
 		SELECT
 			p.id, p.user_id, p.title, p.content, p.tags, p.created_at, p.updated_at,
@@ -100,19 +120,27 @@ func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, 
 		LEFT JOIN comments c ON c.post_id = p.id
 		LEFT JOIN users u ON p.user_id = u.id
 		LEFT JOIN user_followers f ON f.following_id = p.user_id AND f.follower_id = $1
-		WHERE p.user_id = $1 OR f.follower_id IS NOT NULL
-		GROUP BY p.id, u.username
-		ORDER BY p.created_at ` + paginatedQuery.Sort + `
-		LIMIT $2 OFFSET $3;
+		WHERE (p.user_id = $1 OR f.follower_id IS NOT NULL)
 	`
-	err := post_store.db.WithContext(ctx).
-		Raw(countQuery, userId).Scan(&total).Error
-	if err != nil {
-		return nil, 0, err
+	feedArgs := []any{userId}
+	feedIndex := 2
+	if params.Search != "" {
+		feedQuery += fmt.Sprintf("\nAND (p.title ILIKE $%d OR p.content ILIKE $%d)", feedIndex, feedIndex)
+		feedArgs = append(feedArgs, "%"+params.Search+"%")
+		feedIndex++
 	}
+	if len(params.Tags) > 0 {
+		feedQuery += fmt.Sprintf("\nAND p.tags && $%d::varchar[]", feedIndex)
+		feedArgs = append(feedArgs, pq.Array(params.Tags))
+		feedIndex++
+	}
+	feedQuery += `
+		GROUP BY p.id, u.username
+		ORDER BY p.created_at ` + params.Sort + `
+		LIMIT $` + fmt.Sprint(feedIndex) + ` OFFSET $` + fmt.Sprint(feedIndex+1)
+	feedArgs = append(feedArgs, params.PerPage, (params.Page-1)*params.PerPage)
 	err = post_store.db.WithContext(ctx).
-		Raw(feedQuery, userId, paginatedQuery.PerPage, (paginatedQuery.Page-1)*paginatedQuery.PerPage).
-		Scan(&post_feed).Error
+		Raw(feedQuery, feedArgs...).Scan(&post_feed).Error
 	if err != nil {
 		return nil, 0, err
 	}
