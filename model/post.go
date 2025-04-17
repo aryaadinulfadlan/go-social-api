@@ -27,8 +27,8 @@ type PostParams struct {
 	Sort    string   `json:"sort" validate:"oneof=ASC DESC"`
 	Tags    []string `json:"tags" validate:"dive,required,min=4,max=20"`
 	Search  string   `json:"search" validate:"omitempty,min=1"`
-	Since   string   `json:"since"`
-	Until   string   `json:"until"`
+	Since   string   `json:"since" validate:"omitempty,datetime=2006-01-02"`
+	Until   string   `json:"until" validate:"omitempty,datetime=2006-01-02"`
 }
 
 func ParseTime(str string) string {
@@ -71,11 +71,13 @@ func (params *PostParams) Parse(r *http.Request) (*PostParams, error) {
 	}
 	since := qs.Get("since")
 	if since != "" {
-		params.Since = ParseTime(since)
+		// params.Since = ParseTime(since)
+		params.Since = since
 	}
 	until := qs.Get("until")
 	if until != "" {
-		params.Until = ParseTime(until)
+		// params.Until = ParseTime(until)
+		params.Until = until
 	}
 	return params, nil
 }

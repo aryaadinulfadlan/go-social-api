@@ -105,6 +105,11 @@ func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, 
 		countArgs = append(countArgs, pq.Array(params.Tags))
 		countIndex++
 	}
+	if params.Since != "" && params.Until != "" {
+		countQuery += fmt.Sprintf("\nAND (p.created_at::date BETWEEN $%d AND $%d)", countIndex, countIndex+1)
+		countArgs = append(countArgs, params.Since, params.Until)
+		countIndex += 2
+	}
 	err := post_store.db.WithContext(ctx).
 		Raw(countQuery, countArgs...).Scan(&total).Error
 	if err != nil {
@@ -133,6 +138,11 @@ func (post_store *PostStore) GetPostFeed(ctx context.Context, userId uuid.UUID, 
 		feedQuery += fmt.Sprintf("\nAND p.tags && $%d::varchar[]", feedIndex)
 		feedArgs = append(feedArgs, pq.Array(params.Tags))
 		feedIndex++
+	}
+	if params.Since != "" && params.Until != "" {
+		feedQuery += fmt.Sprintf("\nAND (p.created_at::date BETWEEN $%d AND $%d)", feedIndex, feedIndex+1)
+		feedArgs = append(feedArgs, params.Since, params.Until)
+		feedIndex += 2
 	}
 	feedQuery += `
 		GROUP BY p.id, u.username
