@@ -1,0 +1,128 @@
+basePath: /v1
+definitions:
+  store.Comment:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      post:
+        $ref: '#/definitions/store.Post'
+      post_id:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+      user_id:
+        type: string
+    type: object
+  store.Post:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/store.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+      user_id:
+        type: string
+    type: object
+  store.User:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/store.Comment'
+        type: array
+      created_at:
+        type: string
+      email:
+        type: string
+      followers:
+        items:
+          $ref: '#/definitions/store.User'
+        type: array
+      following:
+        items:
+          $ref: '#/definitions/store.User'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      posts:
+        items:
+          $ref: '#/definitions/store.Post'
+        type: array
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for Go Social Backend Technology
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go Social API
+  version: "1.0"
+paths:
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a user profile by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.User'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Fetches a user profile
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

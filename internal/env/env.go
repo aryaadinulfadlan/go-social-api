@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	ADDR              string
+	EXTERNAL_URL      string
 	DATABASE_URL      string
 	DB_MAX_OPEN_CONNS int
 	DB_MAX_IDLE_CONNS int
@@ -26,6 +27,7 @@ func GetEnv() Config {
 	}
 	return Config{
 		ADDR:              config.GetString("ADDR"),
+		EXTERNAL_URL:      config.GetString("EXTERNAL_URL"),
 		DATABASE_URL:      config.GetString("DATABASE_URL"),
 		DB_MAX_OPEN_CONNS: config.GetInt("DB_MAX_OPEN_CONNS"),
 		DB_MAX_IDLE_CONNS: config.GetInt("DB_MAX_IDLE_CONNS"),

@@ -16,5 +16,8 @@ migrate_version:
 migrate_fix:
 	migrate -database $(DATABASE_URL) -path $(MIGRATIONS_PATH) force $(filter-out $@,$(MAKECMDGOALS))
 
+gen_docs:
+	@swag init -g ./api/main.go -d cmd,internal && swag fmt
+
 %:
 	@:

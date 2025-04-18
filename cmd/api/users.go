@@ -60,6 +60,20 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
 }
 
+// GetUser godoc
+//
+//	@Summary		Fetches a user profile
+//	@Description	Fetches a user profile by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"User ID"
+//	@Success		200	{object}	store.User
+//	@Failure		400	{object}	error
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/users/{id} [get]
 func (app *Application) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
 	if parse_err != nil {
