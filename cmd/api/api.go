@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/sirupsen/logrus"
 )
 
 type DBConfig struct {
@@ -23,7 +23,8 @@ type Config struct {
 }
 type Application struct {
 	Config
-	Store store.Storage
+	Store  store.Storage
+	logger *logrus.Logger
 }
 
 func (app *Application) Mount() *chi.Mux {
@@ -70,6 +71,6 @@ func (app *Application) Run(mux *chi.Mux) error {
 		ReadTimeout:  time.Second * 10,
 		IdleTimeout:  time.Minute,
 	}
-	log.Printf("Server has started at %s", app.Config.Addr)
+	app.logger.Infof("Server has started at %s", app.Config.Addr)
 	return server.ListenAndServe()
 }

@@ -16,7 +16,7 @@ type Post struct {
 	UserId    uuid.UUID      `gorm:"type:uuid" json:"user_id"`
 	Title     string         `json:"title"`
 	Content   string         `json:"content"`
-	Tags      pq.StringArray `gorm:"type:text[]" json:"tags"`
+	Tags      pq.StringArray `gorm:"type:varchar[]" json:"tags"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	User      *User          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`

@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/env"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -18,15 +17,18 @@ func main() {
 			MaxIdleTime:  env.Envs.DB_MAX_IDLE_TIME,
 		},
 	}
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
 	db, err := db.OpenConnection(config.DB.DATABASE_URL, config.DB.MaxOpenConns, config.DB.MaxIdleConns, config.DB.MaxIdleTime)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	store := store.NewStorage(db)
 	app := &Application{
 		Config: config,
 		Store:  *store,
+		logger: logger,
 	}
 	mux := app.Mount()
-	log.Fatal(app.Run(mux))
+	logger.Fatal(app.Run(mux))
 }
