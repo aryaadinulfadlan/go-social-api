@@ -37,12 +37,12 @@ func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Requ
 		}
 	}
 	ctx := r.Context()
-	user, user_err := app.Store.Users.CheckUserExists(ctx, "id", payload.UserId)
+	count, user_err := app.Store.Users.IsUserExists(ctx, "id", payload.UserId)
 	if user_err != nil {
 		app.InternalServerError(w, user_err.Error())
 		return
 	}
-	if user == nil {
+	if count == 0 {
 		app.NotFoundError(w, "User data is not found")
 		return
 	}

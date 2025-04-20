@@ -71,7 +71,7 @@ func (user_store *UserStore) GetUserByInvitation(ctx context.Context, token stri
 	return &user, nil
 }
 
-func (user_store *UserStore) CheckUserExists(ctx context.Context, field string, value any) (*User, error) {
+func (user_store *UserStore) GetExistingUser(ctx context.Context, field string, value any) (*User, error) {
 	var user User
 	validFields := map[string]bool{
 		"id":       true,
@@ -90,6 +90,24 @@ func (user_store *UserStore) CheckUserExists(ctx context.Context, field string, 
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (user_store *UserStore) IsUserExists(ctx context.Context, field string, value any) (int64, error) {
+	var count int64
+	validFields := map[string]bool{
+		"id":       true,
+		"username": true,
+		"email":    true,
+	}
+	if !validFields[field] {
+		return 0, errors.New("invalid field name")
+	}
+	query := fmt.Sprintf("%s = ?", field)
+	err := user_store.db.WithContext(ctx).Model(&User{}).Where(query, value).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (user_store *UserStore) FollowUnfollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {

@@ -43,21 +43,21 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		}
 	}
 	ctx := r.Context()
-	username_exists, username_err := app.Store.Users.CheckUserExists(ctx, "username", payload.Username)
+	username_count, username_err := app.Store.Users.IsUserExists(ctx, "username", payload.Username)
 	if username_err != nil {
 		app.InternalServerError(w, username_err.Error())
 		return
 	}
-	if username_exists != nil {
+	if username_count > 0 {
 		app.BadRequestError(w, "Username already exists")
 		return
 	}
-	email_exists, email_err := app.Store.Users.CheckUserExists(ctx, "email", payload.Email)
+	email_count, email_err := app.Store.Users.IsUserExists(ctx, "email", payload.Email)
 	if email_err != nil {
 		app.InternalServerError(w, email_err.Error())
 		return
 	}
-	if email_exists != nil {
+	if email_count > 0 {
 		app.BadRequestError(w, "Email already exists")
 		return
 	}
@@ -151,7 +151,7 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 		}
 	}
 	ctx := r.Context()
-	target_data, target_err := app.Store.Users.CheckUserExists(ctx, "id", userId)
+	target_data, target_err := app.Store.Users.GetExistingUser(ctx, "id", userId)
 	if target_err != nil {
 		app.InternalServerError(w, target_err.Error())
 		return
@@ -160,7 +160,7 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 		app.NotFoundError(w, "User Target is not found")
 		return
 	}
-	sender_data, sender_err := app.Store.Users.CheckUserExists(ctx, "id", payload.UserSenderId)
+	sender_data, sender_err := app.Store.Users.GetExistingUser(ctx, "id", payload.UserSenderId)
 	if sender_err != nil {
 		app.InternalServerError(w, sender_err.Error())
 		return
@@ -194,7 +194,7 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 	ctx := r.Context()
-	user_data, user_err := app.Store.Users.CheckUserExists(ctx, "id", userId)
+	user_data, user_err := app.Store.Users.GetExistingUser(ctx, "id", userId)
 	if user_err != nil {
 		app.InternalServerError(w, user_err.Error())
 		return

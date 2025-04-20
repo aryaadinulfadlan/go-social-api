@@ -21,7 +21,8 @@ type Storage struct {
 		CreateUserAndInvite(context.Context, *User, *UserInvitation) error
 		GetUser(context.Context, uuid.UUID) (*User, error)
 		GetUserByInvitation(context.Context, string) (*User, error)
-		CheckUserExists(context.Context, string, any) (*User, error)
+		GetExistingUser(context.Context, string, any) (*User, error)
+		IsUserExists(context.Context, string, any) (int64, error)
 		FollowUnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
 		GetConnections(context.Context, uuid.UUID, string) ([]*User, error)
 		ActivateUser(context.Context, *User) (*User, error)
