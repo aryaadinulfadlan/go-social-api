@@ -19,7 +19,7 @@ func main() {
 			MaxIdleTime:  env.Envs.DB_MAX_IDLE_TIME,
 		},
 		mail: MailConfig{
-			exp: time.Minute * 3,
+			exp: time.Minute * 8,
 		},
 	}
 	logger := logrus.New()

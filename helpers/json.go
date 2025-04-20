@@ -56,3 +56,20 @@ func GenerateJWT(user_id string, exp time.Time) (string, error) {
 	}
 	return token_string, nil
 }
+
+func ParseJWT(tokenStr string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(env.Envs.SECRET_KEY), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid claims")
+	}
+	return claims, nil
+}

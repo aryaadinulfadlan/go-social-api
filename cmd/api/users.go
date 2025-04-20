@@ -215,3 +215,34 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }
+
+func (app *Application) ActivateUserHandler(w http.ResponseWriter, r *http.Request) {
+	tokenStr := chi.URLParam(r, "token")
+	_, claims_err := helpers.ParseJWT(tokenStr)
+	if claims_err != nil {
+		app.BadRequestError(w, claims_err.Error())
+		return
+	}
+	ctx := r.Context()
+	user, user_err := app.Store.Users.GetUserByInvitation(ctx, tokenStr)
+	if user_err != nil {
+		if errors.Is(user_err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, user_err.Error())
+			return
+		}
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	user.IsActivated = true
+	updated_user, updated_err := app.Store.Users.ActivateUser(ctx, user)
+	if updated_err != nil {
+		app.InternalServerError(w, updated_err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   updated_user,
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}

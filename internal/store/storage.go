@@ -20,9 +20,11 @@ type Storage struct {
 	Users interface {
 		CreateUserAndInvite(context.Context, *User, *UserInvitation) error
 		GetUser(context.Context, uuid.UUID) (*User, error)
+		GetUserByInvitation(context.Context, string) (*User, error)
 		CheckUserExists(context.Context, string, any) (*User, error)
 		FollowUnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
 		GetConnections(context.Context, uuid.UUID, string) ([]*User, error)
+		ActivateUser(context.Context, *User) (*User, error)
 	}
 	Comments interface {
 		CreateComment(context.Context, *Comment) error

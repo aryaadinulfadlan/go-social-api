@@ -58,6 +58,19 @@ func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*Us
 	return &user, nil
 }
 
+func (user_store *UserStore) GetUserByInvitation(ctx context.Context, token string) (*User, error) {
+	var user User
+	err := user_store.db.WithContext(ctx).
+		Joins("JOIN user_invitations ui ON ui.user_id = users.id").
+		Where("ui.token = ? AND ui.expiry > ?", token, time.Now()).
+		// Preload("UserInvitation").
+		Take(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (user_store *UserStore) CheckUserExists(ctx context.Context, field string, value any) (*User, error) {
 	var user User
 	validFields := map[string]bool{
@@ -119,4 +132,26 @@ func (user_store *UserStore) GetConnections(ctx context.Context, userId uuid.UUI
 		return nil, err
 	}
 	return users, nil
+}
+
+func (user_store *UserStore) ActivateUser(ctx context.Context, user *User) (*User, error) {
+	err := user_store.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&User{}).
+			Where("id = ?", user.Id).
+			Updates(User{
+				IsActivated: user.IsActivated,
+			}).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Where("user_id = ?", user.Id).Delete(&UserInvitation{}).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
