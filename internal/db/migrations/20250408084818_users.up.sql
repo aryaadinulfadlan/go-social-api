@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     "name" VARCHAR(20) NOT NULL,
     "username" CITEXT UNIQUE NOT NULL,
     "email" CITEXT UNIQUE NOT NULL,
-    "password" BYTEA NOT NULL,
+    "password" TEXT NOT NULL,
+    "is_activated" BOOLEAN NOT NULL DEFAULT FALSE,
     "created_at" TIMESTAMPTZ,
     "updated_at" TIMESTAMPTZ
 );

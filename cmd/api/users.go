@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -40,14 +42,49 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
+	ctx := r.Context()
+	username_exists, username_err := app.Store.Users.CheckUserExists(ctx, "username", payload.Username)
+	if username_err != nil {
+		app.InternalServerError(w, username_err.Error())
+		return
+	}
+	if username_exists != nil {
+		app.BadRequestError(w, "Username already exists")
+		return
+	}
+	email_exists, email_err := app.Store.Users.CheckUserExists(ctx, "email", payload.Email)
+	if email_err != nil {
+		app.InternalServerError(w, email_err.Error())
+		return
+	}
+	if email_exists != nil {
+		app.BadRequestError(w, "Email already exists")
+		return
+	}
+	bytes, hash_err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+	if hash_err != nil {
+		app.InternalServerError(w, hash_err.Error())
+		return
+	}
 	user := store.User{
+		Id:       uuid.New(),
 		Name:     payload.Name,
 		Username: payload.Username,
 		Email:    payload.Email,
-		Password: payload.Password,
+		Password: string(bytes),
 	}
-	ctx := r.Context()
-	err = app.Store.Users.CreateUser(ctx, &user)
+	exp := time.Now().Add(app.Config.mail.exp)
+	token, token_err := helpers.GenerateJWT(user.Id.String(), exp)
+	if token_err != nil {
+		app.InternalServerError(w, token_err.Error())
+		return
+	}
+	user_invitation := store.UserInvitation{
+		UserId: user.Id,
+		Token:  token,
+		Expiry: exp,
+	}
+	err = app.Store.Users.CreateUserAndInvite(ctx, &user, &user_invitation)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return
@@ -114,22 +151,22 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 		}
 	}
 	ctx := r.Context()
-	target_data, target_err := app.Store.Users.CheckUserExists(ctx, userId)
+	target_data, target_err := app.Store.Users.CheckUserExists(ctx, "id", userId)
 	if target_err != nil {
-		if errors.Is(target_err, gorm.ErrRecordNotFound) {
-			app.NotFoundError(w, "User Target is not found")
-			return
-		}
 		app.InternalServerError(w, target_err.Error())
 		return
 	}
-	sender_data, sender_err := app.Store.Users.CheckUserExists(ctx, payload.UserSenderId)
+	if target_data == nil {
+		app.NotFoundError(w, "User Target is not found")
+		return
+	}
+	sender_data, sender_err := app.Store.Users.CheckUserExists(ctx, "id", payload.UserSenderId)
 	if sender_err != nil {
-		if errors.Is(sender_err, gorm.ErrRecordNotFound) {
-			app.NotFoundError(w, "User Sender is not found")
-			return
-		}
 		app.InternalServerError(w, sender_err.Error())
+		return
+	}
+	if sender_data == nil {
+		app.NotFoundError(w, "User Sender is not found")
 		return
 	}
 	err = app.Store.Users.FollowUnfollowUser(ctx, target_data.Id, sender_data.Id)
@@ -157,13 +194,13 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 	ctx := r.Context()
-	user_data, user_err := app.Store.Users.CheckUserExists(ctx, userId)
+	user_data, user_err := app.Store.Users.CheckUserExists(ctx, "id", userId)
 	if user_err != nil {
-		if errors.Is(user_err, gorm.ErrRecordNotFound) {
-			app.NotFoundError(w, user_err.Error())
-			return
-		}
 		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	if user_data == nil {
+		app.NotFoundError(w, "User data is not found")
 		return
 	}
 	users, err := app.Store.Users.GetConnections(ctx, user_data.Id, actionType)

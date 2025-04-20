@@ -18,9 +18,9 @@ type Storage struct {
 		GetPostFeed(context.Context, uuid.UUID, *model.PostParams) ([]*PostWithMetadata, int64, error)
 	}
 	Users interface {
-		CreateUser(context.Context, *User) error
+		CreateUserAndInvite(context.Context, *User, *UserInvitation) error
 		GetUser(context.Context, uuid.UUID) (*User, error)
-		CheckUserExists(context.Context, uuid.UUID) (*User, error)
+		CheckUserExists(context.Context, string, any) (*User, error)
 		FollowUnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
 		GetConnections(context.Context, uuid.UUID, string) ([]*User, error)
 	}

@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,35 +11,44 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `gorm:"type:citext;unique" json:"username"`
-	Email     string    `gorm:"type:citext;unique" json:"email"`
-	Password  string    `gorm:"type:bytea" json:"-"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Posts     []Post    `json:"posts,omitempty"`
-	Comments  []Comment `json:"comments,omitempty"`
-	Following []*User   `gorm:"many2many:user_followers;joinForeignKey:follower_id;joinReferences:following_id" json:"following"`
-	Followers []*User   `gorm:"many2many:user_followers;joinForeignKey:following_id;joinReferences:follower_id" json:"followers"`
-}
-
-func (user *User) BeforeCreate(db *gorm.DB) (err error) {
-	user.Id = uuid.New()
-	return
+	Id             uuid.UUID       `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
+	Name           string          `json:"name"`
+	Username       string          `gorm:"type:citext;unique" json:"username"`
+	Email          string          `gorm:"type:citext;unique" json:"email"`
+	Password       string          `json:"-"`
+	IsActivated    bool            `json:"is_activated"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	Posts          []Post          `json:"posts,omitempty"`
+	UserInvitation *UserInvitation `json:"user_invitation,omitempty"`
+	Comments       []Comment       `json:"comments,omitempty"`
+	Following      []*User         `gorm:"many2many:user_followers;joinForeignKey:follower_id;joinReferences:following_id" json:"following,omitempty"`
+	Followers      []*User         `gorm:"many2many:user_followers;joinForeignKey:following_id;joinReferences:follower_id" json:"followers,omitempty"`
 }
 
 type UserStore struct {
 	db *gorm.DB
 }
 
-func (user_store *UserStore) CreateUser(ctx context.Context, user *User) error {
-	err := user_store.db.WithContext(ctx).Create(&user).Error
+func (user_store *UserStore) CreateUserAndInvite(ctx context.Context, user *User, user_invitation *UserInvitation) error {
+	err := user_store.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		err := tx.Create(&user).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Create(&user_invitation).Error
+		if err != nil {
+			return err
+		}
+		user.UserInvitation = user_invitation
+		return nil
+	})
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*User, error) {
 	var user User
 	err := user_store.db.WithContext(ctx).Preload("Following").Preload("Followers").Take(&user, "id = ?", userId).Error
@@ -46,14 +57,28 @@ func (user_store *UserStore) GetUser(ctx context.Context, userId uuid.UUID) (*Us
 	}
 	return &user, nil
 }
-func (user_store *UserStore) CheckUserExists(ctx context.Context, userId uuid.UUID) (*User, error) {
+
+func (user_store *UserStore) CheckUserExists(ctx context.Context, field string, value any) (*User, error) {
 	var user User
-	err := user_store.db.WithContext(ctx).Take(&user, "id = ?", userId).Error
+	validFields := map[string]bool{
+		"id":       true,
+		"username": true,
+		"email":    true,
+	}
+	if !validFields[field] {
+		return nil, errors.New("invalid field name")
+	}
+	query := fmt.Sprintf("%s = ?", field)
+	err := user_store.db.WithContext(ctx).Where(query, value).Take(&user).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &user, nil
 }
+
 func (user_store *UserStore) FollowUnfollowUser(ctx context.Context, targetId uuid.UUID, senderId uuid.UUID) error {
 	// err := user_store.db.WithContext(ctx).Select("id").Model(&User{Id: senderId}).Association("Following").Append(&User{Id: targetId})
 	// relation := make(map[string]interface{})

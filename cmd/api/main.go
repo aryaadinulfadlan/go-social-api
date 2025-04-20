@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/env"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
@@ -15,6 +17,9 @@ func main() {
 			MaxOpenConns: env.Envs.DB_MAX_OPEN_CONNS,
 			MaxIdleConns: env.Envs.DB_MAX_IDLE_CONNS,
 			MaxIdleTime:  env.Envs.DB_MAX_IDLE_TIME,
+		},
+		mail: MailConfig{
+			exp: time.Minute * 3,
 		},
 	}
 	logger := logrus.New()

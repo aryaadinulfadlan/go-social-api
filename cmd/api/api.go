@@ -17,9 +17,13 @@ type DBConfig struct {
 	MaxIdleConns int
 	MaxIdleTime  string
 }
+type MailConfig struct {
+	exp time.Duration
+}
 type Config struct {
 	Addr string
 	DB   DBConfig
+	mail MailConfig
 }
 type Application struct {
 	Config
@@ -50,12 +54,14 @@ func (app *Application) Mount() *chi.Mux {
 			r.Delete("/{postId}", app.DeletePostHandler)
 		})
 		r.Route("/users", func(r chi.Router) {
-			r.Post("/", app.CreateUserHandler)
 			r.Get("/{userId}", app.GetUserHandler)
 			r.Post("/{userId}/follow", app.FollowUnfollowUserHandler)
 			r.Get("/{userId}/followers", app.GetConnectionsHandler)
 			r.Get("/{userId}/following", app.GetConnectionsHandler)
 			r.Get("/feed", app.GetPostFeedHandler)
+		})
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/", app.CreateUserHandler)
 		})
 		r.Route("/comments", func(r chi.Router) {
 			r.Post("/", app.CreateCommentHandler)

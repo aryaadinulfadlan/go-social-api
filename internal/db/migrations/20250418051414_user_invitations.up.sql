@@ -1,0 +1,11 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS user_invitations (
+    "id" UUID PRIMARY KEY,
+    "user_id" UUID NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiry" TIMESTAMPTZ NOT NULL,
+    "created_at" TIMESTAMPTZ,
+    "updated_at" TIMESTAMPTZ,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
