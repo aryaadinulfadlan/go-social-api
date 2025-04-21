@@ -120,6 +120,34 @@ func (app *Application) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }
+func (app *Application) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid User ID Parameters")
+		return
+	}
+	ctx := r.Context()
+	count, user_err := app.Store.Users.IsUserExists(ctx, "id", userId)
+	if user_err != nil {
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	if count == 0 {
+		app.NotFoundError(w, "User data is not found")
+		return
+	}
+	err := app.Store.Users.DeleteUser(ctx, userId)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data:   "Resource deleted successfully.",
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}
 
 func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))

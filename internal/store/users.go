@@ -173,3 +173,12 @@ func (user_store *UserStore) ActivateUser(ctx context.Context, user *User) (*Use
 	}
 	return user, nil
 }
+
+func (user_store *UserStore) DeleteUser(ctx context.Context, userId uuid.UUID) error {
+	var user User
+	err := user_store.db.WithContext(ctx).Where("id = ?", userId).Delete(&user).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

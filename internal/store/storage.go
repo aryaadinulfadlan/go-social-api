@@ -26,6 +26,7 @@ type Storage struct {
 		FollowUnfollowUser(context.Context, uuid.UUID, uuid.UUID) error
 		GetConnections(context.Context, uuid.UUID, string) ([]*User, error)
 		ActivateUser(context.Context, *User) (*User, error)
+		DeleteUser(context.Context, uuid.UUID) error
 	}
 	Comments interface {
 		CreateComment(context.Context, *Comment) error
