@@ -49,3 +49,6 @@ func (app *Application) MethodNotAllowedError(w http.ResponseWriter, err string)
 func (app *Application) BadRequestError(w http.ResponseWriter, err string) {
 	helpers.WriteErrorResponse(w, http.StatusBadRequest, internal.StatusBadRequest, err)
 }
+func (app *Application) UnauthorizedError(w http.ResponseWriter, err string) {
+	helpers.WriteErrorResponse(w, http.StatusUnauthorized, internal.StatusUnauthorized, err)
+}

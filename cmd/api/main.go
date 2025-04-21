@@ -21,6 +21,12 @@ func main() {
 		mail: MailConfig{
 			exp: time.Minute * 8,
 		},
+		auth: AuthConfig{
+			basic: AuthBasicConfig{
+				user: env.Envs.AUTH_BASIC_USERNAME,
+				pass: env.Envs.AUTH_BASIC_PASSWORD,
+			},
+		},
 	}
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})

@@ -21,10 +21,18 @@ type DBConfig struct {
 type MailConfig struct {
 	exp time.Duration
 }
+type AuthBasicConfig struct {
+	user string
+	pass string
+}
+type AuthConfig struct {
+	basic AuthBasicConfig
+}
 type Config struct {
 	Addr string
 	DB   DBConfig
 	mail MailConfig
+	auth AuthConfig
 }
 type Application struct {
 	Config
@@ -57,7 +65,7 @@ func (app *Application) Mount() *chi.Mux {
 		app.MethodNotAllowedError(w, fmt.Sprintf("%s %s is not valid", r.Method, r.URL.Path))
 	})
 	r.Route("/v1", func(r chi.Router) {
-		r.Get("/test", app.Test)
+		r.With(app.BasicAuthMiddleware()).Get("/test", app.Test)
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.CreatePostHandler)
 			r.Get("/{postId}", app.GetPostHandler)
