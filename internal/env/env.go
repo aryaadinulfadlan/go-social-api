@@ -12,6 +12,11 @@ type Config struct {
 	DB_MAX_IDLE_CONNS int
 	DB_MAX_IDLE_TIME  string
 	SECRET_KEY        string
+	SENDGRID_API_KEY  string
+	MAILTRAP_API_KEY  string
+	FROM_EMAIL        string
+	FRONTEND_URL      string
+	ENV               string
 }
 
 var Envs = GetEnv()
@@ -33,5 +38,10 @@ func GetEnv() Config {
 		DB_MAX_IDLE_CONNS: config.GetInt("DB_MAX_IDLE_CONNS"),
 		DB_MAX_IDLE_TIME:  config.GetString("DB_MAX_IDLE_TIME"),
 		SECRET_KEY:        config.GetString("SECRET_KEY"),
+		SENDGRID_API_KEY:  config.GetString("SENDGRID_API_KEY"),
+		MAILTRAP_API_KEY:  config.GetString("MAILTRAP_API_KEY"),
+		FROM_EMAIL:        config.GetString("FROM_EMAIL"),
+		FRONTEND_URL:      config.GetString("FRONTEND_URL"),
+		ENV:               config.GetString("ENV"),
 	}
 }

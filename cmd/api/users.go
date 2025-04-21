@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"path"
 	"strings"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal"
+	"github.com/aryaadinulfadlan/go-social-api/internal/env"
+	"github.com/aryaadinulfadlan/go-social-api/internal/mailer"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/go-chi/chi/v5"
@@ -89,6 +92,28 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		app.InternalServerError(w, err.Error())
 		return
 	}
+	activationURL := fmt.Sprintf("%s/confirm/%s", env.Envs.FRONTEND_URL, token)
+	isProdEnv := env.Envs.ENV == "production"
+	vars := struct {
+		Username      string
+		ActivationURL string
+	}{
+		Username:      user.Username,
+		ActivationURL: activationURL,
+	}
+	status, mail_err := app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !isProdEnv)
+	if mail_err != nil {
+		app.logger.Errorf("error sending welcome email %s", mail_err.Error())
+		delete_err := app.Store.Users.DeleteUser(ctx, user.Id)
+		if delete_err != nil {
+			app.logger.Errorf("error deleting user %s", delete_err.Error())
+			app.InternalServerError(w, delete_err.Error())
+			return
+		}
+		app.InternalServerError(w, mail_err.Error())
+		return
+	}
+	app.logger.Infof("Email sent %d", status)
 	web_response := model.WebResponse{
 		Code:   http.StatusCreated,
 		Status: internal.StatusCreated,

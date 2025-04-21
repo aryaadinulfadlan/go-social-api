@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/mailer"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -17,18 +18,29 @@ type DBConfig struct {
 	MaxIdleConns int
 	MaxIdleTime  string
 }
+type sendGridConfig struct {
+	apiKey string
+}
+type mailTrapConfig struct {
+	apiKey string
+}
 type MailConfig struct {
-	exp time.Duration
+	exp       time.Duration
+	fromEmail string
+	sendGrid  sendGridConfig
+	mailTrap  mailTrapConfig
 }
 type Config struct {
 	Addr string
 	DB   DBConfig
 	mail MailConfig
 }
+
 type Application struct {
 	Config
 	Store  store.Storage
 	logger *logrus.Logger
+	mailer mailer.Client
 }
 
 func (app *Application) Mount() *chi.Mux {
