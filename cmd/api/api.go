@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -26,7 +27,8 @@ type AuthBasicConfig struct {
 	pass string
 }
 type AuthConfig struct {
-	basic AuthBasicConfig
+	basic    AuthBasicConfig
+	tokenExp time.Duration
 }
 type Config struct {
 	Addr string
@@ -36,8 +38,9 @@ type Config struct {
 }
 type Application struct {
 	Config
-	Store  store.Storage
-	logger *logrus.Logger
+	Store         store.Storage
+	logger        *logrus.Logger
+	authenticator auth.Authenticator
 }
 
 func (app *Application) Mount() *chi.Mux {
@@ -81,7 +84,8 @@ func (app *Application) Mount() *chi.Mux {
 			r.Delete("/{userId}", app.DeleteUserHandler)
 		})
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/", app.CreateUserHandler)
+			r.Post("/sign-up", app.CreateUserHandler)
+			r.Post("/sign-in", app.LoginUserHandler)
 			r.Put("/activate/{token}", app.ActivateUserHandler)
 		})
 		r.Route("/comments", func(r chi.Router) {

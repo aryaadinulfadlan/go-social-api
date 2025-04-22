@@ -18,6 +18,71 @@ import (
 	"gorm.io/gorm"
 )
 
+func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
+	var payload model.LoginUserPayload
+	err := helpers.ReadFromRequestBody(r, &payload)
+	if err != nil {
+		app.BadRequestError(w, "Invalid JSON Body")
+		return
+	}
+	if err := Validate.Struct(payload); err != nil {
+		var validation_errors validator.ValidationErrors
+		if errors.As(err, &validation_errors) {
+			error_messages := make([]string, len(validation_errors))
+			for idx, e := range validation_errors {
+				message := GetValidationErrorMessage(e.Tag(), e.Field(), e.Param())
+				error_messages[idx] = message
+			}
+			errorResponse := model.WebResponse{
+				Code:   http.StatusBadRequest,
+				Status: internal.StatusBadRequest,
+				Data:   error_messages,
+			}
+			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+			return
+		}
+	}
+	ctx := r.Context()
+	user_data, user_err := app.Store.Users.GetExistingUser(ctx, "email", payload.Email)
+	if user_err != nil {
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	if user_data == nil {
+		app.UnauthorizedError(w, "Invalid email or password")
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user_data.Password), []byte(payload.Password))
+	if err != nil {
+		app.UnauthorizedError(w, "Invalid email or password")
+		return
+	}
+	if !user_data.IsActivated {
+		app.ForbiddenError(w, "Account is not activated")
+		return
+	}
+	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
+	token, token_err := app.authenticator.GenerateJWT(user_data.Id.String(), exp)
+	if token_err != nil {
+		app.InternalServerError(w, token_err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusOK,
+		Status: internal.StatusOK,
+		Data: model.LoginSuccess{
+			User: model.UserResponse{
+				Id:       user_data.Id,
+				Name:     user_data.Name,
+				Email:    user_data.Email,
+				Username: user_data.Username,
+			},
+			Token: token,
+		},
+	}
+	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+}
+
 func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateUserPayload
 	err := helpers.ReadFromRequestBody(r, &payload)
@@ -73,8 +138,8 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		Email:    payload.Email,
 		Password: string(bytes),
 	}
-	exp := time.Now().Add(app.Config.mail.exp)
-	token, token_err := helpers.GenerateJWT(user.Id.String(), exp)
+	exp := time.Now().Add(app.Config.mail.exp).UTC()
+	token, token_err := app.authenticator.GenerateJWT(user.Id.String(), exp)
 	if token_err != nil {
 		app.InternalServerError(w, token_err.Error())
 		return
@@ -120,6 +185,7 @@ func (app *Application) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
 }
+
 func (app *Application) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
 	if parse_err != nil {
@@ -246,7 +312,7 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 
 func (app *Application) ActivateUserHandler(w http.ResponseWriter, r *http.Request) {
 	tokenStr := chi.URLParam(r, "token")
-	_, claims_err := helpers.ParseJWT(tokenStr)
+	_, claims_err := app.authenticator.ParseJWT(tokenStr)
 	if claims_err != nil {
 		app.BadRequestError(w, claims_err.Error())
 		return

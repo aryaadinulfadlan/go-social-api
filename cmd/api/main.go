@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/env"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
@@ -19,13 +20,14 @@ func main() {
 			MaxIdleTime:  env.Envs.DB_MAX_IDLE_TIME,
 		},
 		mail: MailConfig{
-			exp: time.Minute * 8,
+			exp: time.Minute * 10,
 		},
 		auth: AuthConfig{
 			basic: AuthBasicConfig{
 				user: env.Envs.AUTH_BASIC_USERNAME,
 				pass: env.Envs.AUTH_BASIC_PASSWORD,
 			},
+			tokenExp: time.Minute * 5,
 		},
 	}
 	logger := logrus.New()
@@ -35,10 +37,12 @@ func main() {
 		logger.Fatal(err)
 	}
 	store := store.NewStorage(db)
+	jwtAuthenticator := auth.NewJWTAuthenticator(env.Envs.SECRET_KEY)
 	app := &Application{
-		Config: config,
-		Store:  *store,
-		logger: logger,
+		Config:        config,
+		Store:         *store,
+		logger:        logger,
+		authenticator: jwtAuthenticator,
 	}
 	mux := app.Mount()
 	logger.Fatal(app.Run(mux))
