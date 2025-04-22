@@ -8,11 +8,18 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/model"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	postId, parse_err := uuid.Parse(chi.URLParam(r, "postId"))
+	if parse_err != nil {
+		app.BadRequestError(w, "Invalid Post ID Parameters")
+		return
+	}
 	var payload model.CreateCommentPayload
 	err := helpers.ReadFromRequestBody(r, &payload)
 	if err != nil {
@@ -37,16 +44,8 @@ func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Requ
 		}
 	}
 	ctx := r.Context()
-	count, user_err := app.Store.Users.IsUserExists(ctx, "id", payload.UserId)
-	if user_err != nil {
-		app.InternalServerError(w, user_err.Error())
-		return
-	}
-	if count == 0 {
-		app.NotFoundError(w, "User data is not found")
-		return
-	}
-	_, post_err := app.Store.Posts.CheckPostExists(ctx, payload.PostId)
+	user := GetUserFromContext(r)
+	_, post_err := app.Store.Posts.CheckPostExists(ctx, postId)
 	if post_err != nil {
 		if errors.Is(post_err, gorm.ErrRecordNotFound) {
 			app.NotFoundError(w, "Post data is not found")
@@ -56,8 +55,8 @@ func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	comment := store.Comment{
-		UserId:  payload.UserId,
-		PostId:  payload.PostId,
+		UserId:  user.Id,
+		PostId:  postId,
 		Content: payload.Content,
 	}
 	err = app.Store.Comments.CreateComment(ctx, &comment)

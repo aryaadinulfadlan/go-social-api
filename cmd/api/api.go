@@ -96,7 +96,8 @@ func (app *Application) Mount() *chi.Mux {
 			r.Put("/activate/{token}", app.ActivateUserHandler)
 		})
 		r.Route("/comments", func(r chi.Router) {
-			r.Post("/", app.CreateCommentHandler)
+			r.Use(app.AuthTokenMiddleware)
+			r.Post("/{postId}", app.CreateCommentHandler)
 		})
 	})
 	return r

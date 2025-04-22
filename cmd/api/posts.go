@@ -38,9 +38,9 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
-	user_id, _ := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
+	user := GetUserFromContext(r)
 	post := store.Post{
-		UserId:  user_id,
+		UserId:  user.Id,
 		Title:   payload.Title,
 		Content: payload.Content,
 		Tags:    payload.Tags,
@@ -169,12 +169,6 @@ func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Request) {
-	// userId, parse_err := uuid.Parse("5340ee00-6f9c-49be-a066-ff4442ec24b7")
-	userId, parse_err := uuid.Parse("030e656e-cc3e-47f3-813a-33a3d50b5373")
-	if parse_err != nil {
-		app.BadRequestError(w, "Invalid Post ID Parameters")
-		return
-	}
 	params := &model.PostParams{
 		PerPage: 10,
 		Page:    1,
@@ -203,7 +197,8 @@ func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 	ctx := r.Context()
-	feed, total, err := app.Store.Posts.GetPostFeed(ctx, userId, params)
+	user := GetUserFromContext(r)
+	feed, total, err := app.Store.Posts.GetPostFeed(ctx, user.Id, params)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return

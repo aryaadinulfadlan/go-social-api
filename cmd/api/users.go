@@ -299,34 +299,12 @@ func (app *Application) DeleteUserHandler(w http.ResponseWriter, r *http.Request
 
 func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	userId, parse_err := uuid.Parse(chi.URLParam(r, "userId"))
-	var payload model.FollowUnfollowPayload
 	if parse_err != nil {
 		app.BadRequestError(w, "Invalid User ID Parameters")
 		return
 	}
-	err := helpers.ReadFromRequestBody(r, &payload)
-	if err != nil {
-		app.BadRequestError(w, "Invalid JSON Body")
-		return
-	}
-	if err := Validate.Struct(payload); err != nil {
-		var validation_errors validator.ValidationErrors
-		if errors.As(err, &validation_errors) {
-			error_messages := make([]string, len(validation_errors))
-			for idx, e := range validation_errors {
-				message := GetValidationErrorMessage(e.Tag(), e.Field(), e.Param())
-				error_messages[idx] = message
-			}
-			errorResponse := model.WebResponse{
-				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
-				Data:   error_messages,
-			}
-			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
-			return
-		}
-	}
 	ctx := r.Context()
+	user := GetUserFromContext(r)
 	target_data, target_err := app.Store.Users.GetExistingUser(ctx, "id", userId)
 	if target_err != nil {
 		app.InternalServerError(w, target_err.Error())
@@ -336,16 +314,7 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 		app.NotFoundError(w, "User Target is not found")
 		return
 	}
-	sender_data, sender_err := app.Store.Users.GetExistingUser(ctx, "id", payload.UserSenderId)
-	if sender_err != nil {
-		app.InternalServerError(w, sender_err.Error())
-		return
-	}
-	if sender_data == nil {
-		app.NotFoundError(w, "User Sender is not found")
-		return
-	}
-	err = app.Store.Users.FollowUnfollowUser(ctx, target_data.Id, sender_data.Id)
+	err := app.Store.Users.FollowUnfollowUser(ctx, target_data.Id, user.Id)
 	if err != nil {
 		app.InternalServerError(w, err.Error())
 		return
@@ -354,7 +323,7 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 		Code:   http.StatusOK,
 		Status: internal.StatusOK,
 		Data: map[string]any{
-			"senderId": sender_data.Id,
+			"senderId": user.Id,
 			"targetId": target_data.Id,
 		},
 	}
