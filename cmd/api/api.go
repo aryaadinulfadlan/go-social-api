@@ -43,6 +43,10 @@ type Application struct {
 	authenticator auth.Authenticator
 }
 
+type userKey string
+
+const userCtx userKey = "user"
+
 func (app *Application) Mount() *chi.Mux {
 	r := chi.NewRouter()
 
@@ -70,12 +74,14 @@ func (app *Application) Mount() *chi.Mux {
 	r.Route("/v1", func(r chi.Router) {
 		r.With(app.BasicAuthMiddleware()).Get("/test", app.Test)
 		r.Route("/posts", func(r chi.Router) {
+			r.Use(app.AuthTokenMiddleware)
 			r.Post("/", app.CreatePostHandler)
 			r.Get("/{postId}", app.GetPostHandler)
 			r.Patch("/{postId}", app.UpdatePostHandler)
 			r.Delete("/{postId}", app.DeletePostHandler)
 		})
 		r.Route("/users", func(r chi.Router) {
+			r.Use(app.AuthTokenMiddleware)
 			r.Get("/{userId}", app.GetUserHandler)
 			r.Post("/{userId}/follow", app.FollowUnfollowUserHandler)
 			r.Get("/{userId}/followers", app.GetConnectionsHandler)

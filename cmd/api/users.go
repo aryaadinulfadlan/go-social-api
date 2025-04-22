@@ -18,6 +18,11 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetUserFromContext(r *http.Request) *store.User {
+	user := r.Context().Value(userCtx).(*store.User)
+	return user
+}
+
 func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.Request) {
 	var payload model.ResendActivationPayload
 	err := helpers.ReadFromRequestBody(r, &payload)

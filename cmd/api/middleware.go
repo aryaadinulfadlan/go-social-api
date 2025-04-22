@@ -1,10 +1,48 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"net/http"
 	"strings"
 )
+
+func (app *Application) AuthTokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			app.UnauthorizedError(w, "Authorization header is missing")
+			return
+		}
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			app.UnauthorizedError(w, "Authorization header is malformed")
+			return
+		}
+		claims_token, claims_err := app.authenticator.ParseJWT(parts[1])
+		if claims_err != nil {
+			app.UnauthorizedError(w, claims_err.Error())
+			return
+		}
+		userId, subject_err := claims_token.GetSubject()
+		if subject_err != nil {
+			app.UnauthorizedError(w, subject_err.Error())
+			return
+		}
+		ctx := r.Context()
+		user, err := app.Store.Users.GetExistingUser(ctx, "id", userId)
+		if err != nil {
+			app.InternalServerError(w, err.Error())
+			return
+		}
+		if user == nil {
+			app.NotFoundError(w, "User does not exist")
+			return
+		}
+		ctx = context.WithValue(ctx, userCtx, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
 
 func (app *Application) BasicAuthMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
