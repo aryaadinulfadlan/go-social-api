@@ -31,12 +31,17 @@ type Storage struct {
 	Comments interface {
 		CreateComment(context.Context, *Comment) error
 	}
+	UserInvitations interface {
+		CreateUserInvitation(context.Context, *UserInvitation) error
+		DeleteUserInvitation(context.Context, uuid.UUID) error
+	}
 }
 
 func NewStorage(db *gorm.DB) *Storage {
 	return &Storage{
-		Posts:    &PostStore{db},
-		Users:    &UserStore{db},
-		Comments: &CommentStore{db},
+		Posts:           &PostStore{db},
+		Users:           &UserStore{db},
+		Comments:        &CommentStore{db},
+		UserInvitations: &UserInvitationStore{db},
 	}
 }

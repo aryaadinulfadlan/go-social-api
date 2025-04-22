@@ -62,7 +62,7 @@ func (user_store *UserStore) GetUserByInvitation(ctx context.Context, token stri
 	var user User
 	err := user_store.db.WithContext(ctx).
 		Joins("JOIN user_invitations ui ON ui.user_id = users.id").
-		Where("ui.token = ? AND ui.expiry > ?", token, time.Now().UTC()).
+		Where("ui.token = ? AND ui.expired_at > ?", token, time.Now().UTC()).
 		// Preload("UserInvitation").
 		Take(&user).Error
 	if err != nil {

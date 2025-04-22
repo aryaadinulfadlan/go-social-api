@@ -18,6 +18,83 @@ import (
 	"gorm.io/gorm"
 )
 
+func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.Request) {
+	var payload model.ResendActivationPayload
+	err := helpers.ReadFromRequestBody(r, &payload)
+	if err != nil {
+		app.BadRequestError(w, "Invalid JSON Body")
+		return
+	}
+	if err := Validate.Struct(payload); err != nil {
+		var validation_errors validator.ValidationErrors
+		if errors.As(err, &validation_errors) {
+			error_messages := make([]string, len(validation_errors))
+			for idx, e := range validation_errors {
+				message := GetValidationErrorMessage(e.Tag(), e.Field(), e.Param())
+				error_messages[idx] = message
+			}
+			errorResponse := model.WebResponse{
+				Code:   http.StatusBadRequest,
+				Status: internal.StatusBadRequest,
+				Data:   error_messages,
+			}
+			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+			return
+		}
+	}
+	ctx := r.Context()
+	user_data, user_err := app.Store.Users.GetExistingUser(ctx, "email", payload.Email)
+	if user_err != nil {
+		app.InternalServerError(w, user_err.Error())
+		return
+	}
+	if user_data == nil {
+		app.UnauthorizedError(w, "Invalid email")
+		return
+	}
+	if user_data.IsActivated {
+		app.ForbiddenError(w, "Account is active")
+		return
+	}
+	delete_err := app.Store.UserInvitations.DeleteUserInvitation(ctx, user_data.Id)
+	if delete_err != nil {
+		if errors.Is(delete_err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, delete_err.Error())
+			return
+		}
+		app.InternalServerError(w, delete_err.Error())
+		return
+	}
+	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
+	token, token_err := app.authenticator.GenerateJWT(user_data.Id.String(), exp)
+	if token_err != nil {
+		app.InternalServerError(w, token_err.Error())
+		return
+	}
+	user_invitation := store.UserInvitation{
+		UserId:    user_data.Id,
+		Token:     token,
+		ExpiredAt: exp,
+	}
+	err = app.Store.UserInvitations.CreateUserInvitation(ctx, &user_invitation)
+	if err != nil {
+		app.InternalServerError(w, err.Error())
+		return
+	}
+	web_response := model.WebResponse{
+		Code:   http.StatusCreated,
+		Status: internal.StatusCreated,
+		Data: model.ResendActivationSuccess{
+			Id:       user_data.Id,
+			Name:     user_data.Name,
+			Username: user_data.Username,
+			Email:    user_data.Email,
+			Token:    token,
+		},
+	}
+	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
+}
+
 func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload model.LoginUserPayload
 	err := helpers.ReadFromRequestBody(r, &payload)
@@ -138,16 +215,16 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		Email:    payload.Email,
 		Password: string(bytes),
 	}
-	exp := time.Now().Add(app.Config.mail.exp).UTC()
+	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
 	token, token_err := app.authenticator.GenerateJWT(user.Id.String(), exp)
 	if token_err != nil {
 		app.InternalServerError(w, token_err.Error())
 		return
 	}
 	user_invitation := store.UserInvitation{
-		UserId: user.Id,
-		Token:  token,
-		Expiry: exp,
+		UserId:    user.Id,
+		Token:     token,
+		ExpiredAt: exp,
 	}
 	err = app.Store.Users.CreateUserAndInvite(ctx, &user, &user_invitation)
 	if err != nil {

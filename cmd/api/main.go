@@ -20,7 +20,7 @@ func main() {
 			MaxIdleTime:  env.Envs.DB_MAX_IDLE_TIME,
 		},
 		mail: MailConfig{
-			exp: time.Minute * 10,
+			exp: time.Hour * 48,
 		},
 		auth: AuthConfig{
 			basic: AuthBasicConfig{
