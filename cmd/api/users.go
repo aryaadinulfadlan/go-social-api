@@ -54,11 +54,11 @@ func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 	if user_data == nil {
-		app.UnauthorizedError(w, "Invalid email")
+		app.NotFoundError(w, "Invalid email")
 		return
 	}
 	if user_data.IsActivated {
-		app.ForbiddenError(w, "Account is active")
+		app.BadRequestError(w, "Account is active")
 		return
 	}
 	delete_err := app.Store.UserInvitations.DeleteUserInvitation(ctx, user_data.Id)
@@ -140,7 +140,7 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if !user_data.IsActivated {
-		app.ForbiddenError(w, "Account is not activated")
+		app.BadRequestError(w, "Account is not activated")
 		return
 	}
 	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
@@ -156,8 +156,9 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 			User: model.UserResponse{
 				Id:       user_data.Id,
 				Name:     user_data.Name,
-				Email:    user_data.Email,
 				Username: user_data.Username,
+				Email:    user_data.Email,
+				Role:     user_data.Role.Name,
 			},
 			Token: token,
 		},
@@ -213,8 +214,18 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		app.InternalServerError(w, hash_err.Error())
 		return
 	}
+	role, role_err := app.Store.Roles.GetRole(ctx, "user")
+	if role_err != nil {
+		if errors.Is(role_err, gorm.ErrRecordNotFound) {
+			app.NotFoundError(w, role_err.Error())
+			return
+		}
+		app.InternalServerError(w, role_err.Error())
+		return
+	}
 	user := store.User{
 		Id:       uuid.New(),
+		RoleId:   role.Id,
 		Name:     payload.Name,
 		Username: payload.Username,
 		Email:    payload.Email,
@@ -251,7 +262,7 @@ func (app *Application) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	user_data, user_err := app.Store.Users.GetUser(ctx, userId)
+	user_data, user_err := app.Store.Users.GetUserDetail(ctx, userId)
 	if user_err != nil {
 		if errors.Is(user_err, gorm.ErrRecordNotFound) {
 			app.NotFoundError(w, user_err.Error())

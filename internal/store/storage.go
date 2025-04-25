@@ -19,7 +19,7 @@ type Storage struct {
 	}
 	Users interface {
 		CreateUserAndInvite(context.Context, *User, *UserInvitation) error
-		GetUser(context.Context, uuid.UUID) (*User, error)
+		GetUserDetail(context.Context, uuid.UUID) (*User, error)
 		GetUserByInvitation(context.Context, string) (*User, error)
 		GetExistingUser(context.Context, string, any) (*User, error)
 		IsUserExists(context.Context, string, any) (int64, error)
@@ -35,6 +35,12 @@ type Storage struct {
 		CreateUserInvitation(context.Context, *UserInvitation) error
 		DeleteUserInvitation(context.Context, uuid.UUID) error
 	}
+	Roles interface {
+		GetRole(context.Context, string) (*Role, error)
+	}
+	Permissions interface {
+		GetPermissionNamesByRoleId(context.Context, uuid.UUID) ([]string, error)
+	}
 }
 
 func NewStorage(db *gorm.DB) *Storage {
@@ -43,5 +49,7 @@ func NewStorage(db *gorm.DB) *Storage {
 		Users:           &UserStore{db},
 		Comments:        &CommentStore{db},
 		UserInvitations: &UserInvitationStore{db},
+		Roles:           &RoleStore{db},
+		Permissions:     &PermissionStore{db},
 	}
 }

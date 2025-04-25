@@ -84,6 +84,7 @@ func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromContext(r)
 	postId, parse_err := uuid.Parse(chi.URLParam(r, "postId"))
 	var payload model.UpdatePostPayload
 	if parse_err != nil {
@@ -123,6 +124,10 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 		app.InternalServerError(w, err.Error())
 		return
 	}
+	if post.UserId != user.Id && user.Role.Name != "admin" {
+		app.ForbiddenError(w, "You do not have permission to access this resource.")
+		return
+	}
 	post.Title = payload.Title
 	post.Content = payload.Content
 	post.Tags = payload.Tags
@@ -140,6 +145,7 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromContext(r)
 	postId, parse_err := uuid.Parse(chi.URLParam(r, "postId"))
 	if parse_err != nil {
 		app.BadRequestError(w, "Invalid Post ID Parameters")
@@ -153,6 +159,10 @@ func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 		app.InternalServerError(w, err.Error())
+		return
+	}
+	if post.UserId != user.Id && user.Role.Name != "admin" {
+		app.ForbiddenError(w, "You do not have permission to access this resource.")
 		return
 	}
 	err = app.Store.Posts.DeletePost(ctx, post.Id)

@@ -15,8 +15,8 @@ type Comment struct {
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	User      *User     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
-	Post      *Post     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"post,omitempty"`
+	User      *User     `gorm:"constraint:OnDelete:CASCADE;" json:"user,omitempty"`
+	Post      *Post     `gorm:"constraint:OnDelete:CASCADE;" json:"post,omitempty"`
 }
 
 func (comment *Comment) BeforeCreate(db *gorm.DB) (err error) {

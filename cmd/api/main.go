@@ -27,7 +27,7 @@ func main() {
 				user: env.Envs.AUTH_BASIC_USERNAME,
 				pass: env.Envs.AUTH_BASIC_PASSWORD,
 			},
-			tokenExp: time.Minute * 5,
+			tokenExp: time.Hour * 2,
 		},
 	}
 	logger := logrus.New()

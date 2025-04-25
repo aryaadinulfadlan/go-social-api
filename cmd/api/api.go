@@ -52,7 +52,7 @@ func (app *Application) Mount() *chi.Mux {
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
@@ -75,19 +75,19 @@ func (app *Application) Mount() *chi.Mux {
 		r.With(app.BasicAuthMiddleware()).Get("/test", app.Test)
 		r.Route("/posts", func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
-			r.Post("/", app.CreatePostHandler)
-			r.Get("/{postId}", app.GetPostHandler)
-			r.Patch("/{postId}", app.UpdatePostHandler)
-			r.Delete("/{postId}", app.DeletePostHandler)
+			r.With(app.RequirePermission("post:create")).Post("/", app.CreatePostHandler)
+			r.With(app.RequirePermission("post:detail")).Get("/{postId}", app.GetPostHandler)
+			r.With(app.RequirePermission("post:update")).Patch("/{postId}", app.UpdatePostHandler)
+			r.With(app.RequirePermission("post:delete")).Delete("/{postId}", app.DeletePostHandler)
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
-			r.Get("/{userId}", app.GetUserHandler)
-			r.Post("/{userId}/follow", app.FollowUnfollowUserHandler)
-			r.Get("/{userId}/followers", app.GetConnectionsHandler)
-			r.Get("/{userId}/following", app.GetConnectionsHandler)
-			r.Get("/feed", app.GetPostFeedHandler)
-			r.Delete("/{userId}", app.DeleteUserHandler)
+			r.With(app.RequirePermission("user:detail")).Get("/{userId}", app.GetUserHandler)
+			r.With(app.RequirePermission("user:follow")).Post("/{userId}/follow", app.FollowUnfollowUserHandler)
+			r.With(app.RequirePermission("user:followers")).Get("/{userId}/followers", app.GetConnectionsHandler)
+			r.With(app.RequirePermission("user:following")).Get("/{userId}/following", app.GetConnectionsHandler)
+			r.With(app.RequirePermission("user:feed")).Get("/feed", app.GetPostFeedHandler)
+			r.With(app.RequirePermission("user:delete")).Delete("/{userId}", app.DeleteUserHandler)
 		})
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/sign-up", app.CreateUserHandler)
@@ -97,7 +97,7 @@ func (app *Application) Mount() *chi.Mux {
 		})
 		r.Route("/comments", func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
-			r.Post("/{postId}", app.CreateCommentHandler)
+			r.With(app.RequirePermission("comment:create")).Post("/{postId}", app.CreateCommentHandler)
 		})
 	})
 	return r

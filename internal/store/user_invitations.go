@@ -15,7 +15,7 @@ type UserInvitation struct {
 	ExpiredAt time.Time `json:"expired_at"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	User      *User     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
+	User      *User     `gorm:"constraint:OnDelete:CASCADE;" json:"user,omitempty"`
 }
 
 func (user_invitation *UserInvitation) BeforeCreate(db *gorm.DB) (err error) {

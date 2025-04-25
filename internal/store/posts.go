@@ -19,7 +19,7 @@ type Post struct {
 	Tags      pq.StringArray `gorm:"type:varchar[]" json:"tags"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	User      *User          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
+	User      *User          `gorm:"constraint:OnDelete:CASCADE;" json:"user,omitempty"`
 	Comments  []Comment      `json:"comments,omitempty"`
 }
 

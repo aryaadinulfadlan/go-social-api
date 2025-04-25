@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"net/http"
+	"slices"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 func (app *Application) AuthTokenMiddleware(next http.Handler) http.Handler {
@@ -73,4 +76,29 @@ func (app *Application) BasicAuthMiddleware() func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (app *Application) RequirePermission(permission string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user := GetUserFromContext(r)
+			if !app.CheckUserPermission(user.Id, permission, w, r) {
+				app.ForbiddenError(w, "You do not have permission to access this resource.")
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func (app *Application) CheckUserPermission(userID uuid.UUID, permission string, w http.ResponseWriter, r *http.Request) bool {
+	user := GetUserFromContext(r)
+	permissions, err := app.Store.Permissions.GetPermissionNamesByRoleId(r.Context(), user.RoleId)
+	if err != nil {
+		return false
+	}
+	if slices.Contains(permissions, permission) {
+		return true
+	}
+	return false
 }
