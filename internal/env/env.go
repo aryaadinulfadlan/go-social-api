@@ -14,6 +14,7 @@ type Config struct {
 	SECRET_KEY          string
 	AUTH_BASIC_USERNAME string
 	AUTH_BASIC_PASSWORD string
+	REDIS_ADDR          string
 }
 
 var Envs = GetEnv()
@@ -37,5 +38,6 @@ func GetEnv() Config {
 		SECRET_KEY:          config.GetString("SECRET_KEY"),
 		AUTH_BASIC_USERNAME: config.GetString("AUTH_BASIC_USERNAME"),
 		AUTH_BASIC_PASSWORD: config.GetString("AUTH_BASIC_PASSWORD"),
+		REDIS_ADDR:          config.GetString("REDIS_ADDR"),
 	}
 }

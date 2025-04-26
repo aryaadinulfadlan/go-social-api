@@ -7,6 +7,7 @@ import (
 
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
+	"github.com/aryaadinulfadlan/go-social-api/internal/store/cache"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -20,27 +21,32 @@ type DBConfig struct {
 	MaxIdleTime  string
 }
 type MailConfig struct {
-	exp time.Duration
+	Exp time.Duration
 }
 type AuthBasicConfig struct {
-	user string
-	pass string
+	User string
+	Pass string
 }
 type AuthConfig struct {
-	basic    AuthBasicConfig
-	tokenExp time.Duration
+	Basic    AuthBasicConfig
+	TokenExp time.Duration
+}
+type RedisConfig struct {
+	Addr string
 }
 type Config struct {
-	Addr string
-	DB   DBConfig
-	mail MailConfig
-	auth AuthConfig
+	Addr  string
+	DB    DBConfig
+	Mail  MailConfig
+	Auth  AuthConfig
+	Redis RedisConfig
 }
 type Application struct {
 	Config
 	Store         store.Storage
-	logger        *logrus.Logger
-	authenticator auth.Authenticator
+	Logger        *logrus.Logger
+	Authenticator auth.Authenticator
+	CacheStorage  cache.CacheStorage
 }
 
 type userKey string
@@ -110,6 +116,6 @@ func (app *Application) Run(mux *chi.Mux) error {
 		ReadTimeout:  time.Second * 10,
 		IdleTimeout:  time.Minute,
 	}
-	app.logger.Infof("Server has started at %s", app.Config.Addr)
+	app.Logger.Infof("Server has started at %s", app.Config.Addr)
 	return server.ListenAndServe()
 }

@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/google/uuid"
 )
 
@@ -22,7 +23,7 @@ func (app *Application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			app.UnauthorizedError(w, "Authorization header is malformed")
 			return
 		}
-		claims_token, claims_err := app.authenticator.ParseJWT(parts[1])
+		claims_token, claims_err := app.Authenticator.ParseJWT(parts[1])
 		if claims_err != nil {
 			app.UnauthorizedError(w, claims_err.Error())
 			return
@@ -33,13 +34,9 @@ func (app *Application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx := r.Context()
-		user, err := app.Store.Users.GetExistingUser(ctx, "id", userId)
+		user, err := app.GetUserCache(ctx, userId)
 		if err != nil {
-			app.InternalServerError(w, err.Error())
-			return
-		}
-		if user == nil {
-			app.NotFoundError(w, "User does not exist")
+			app.UnauthorizedError(w, err.Error())
 			return
 		}
 		ctx = context.WithValue(ctx, userCtx, user)
@@ -65,8 +62,8 @@ func (app *Application) BasicAuthMiddleware() func(http.Handler) http.Handler {
 				app.UnauthorizedError(w, err.Error())
 				return
 			}
-			username := app.Config.auth.basic.user
-			password := app.Config.auth.basic.pass
+			username := app.Config.Auth.Basic.User
+			password := app.Config.Auth.Basic.Pass
 
 			creds := strings.SplitN(string(bytes), ":", 2)
 			if len(creds) != 2 || creds[0] != username || creds[1] != password {
@@ -101,4 +98,22 @@ func (app *Application) CheckUserPermission(userID uuid.UUID, permission string,
 		return true
 	}
 	return false
+}
+
+func (app *Application) GetUserCache(ctx context.Context, userId string) (*store.User, error) {
+	user, err := app.CacheStorage.Users.Get(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		user, err = app.Store.Users.GetExistingUser(ctx, "id", userId)
+		if err != nil {
+			return nil, err
+		}
+		err = app.CacheStorage.Users.Set(ctx, user)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return user, nil
 }

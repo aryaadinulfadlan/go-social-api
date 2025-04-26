@@ -70,8 +70,8 @@ func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.R
 		app.InternalServerError(w, delete_err.Error())
 		return
 	}
-	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
-	token, token_err := app.authenticator.GenerateJWT(user_data.Id.String(), exp)
+	exp := time.Now().Add(app.Config.Auth.TokenExp).UTC()
+	token, token_err := app.Authenticator.GenerateJWT(user_data.Id.String(), exp)
 	if token_err != nil {
 		app.InternalServerError(w, token_err.Error())
 		return
@@ -143,8 +143,8 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 		app.BadRequestError(w, "Account is not activated")
 		return
 	}
-	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
-	token, token_err := app.authenticator.GenerateJWT(user_data.Id.String(), exp)
+	exp := time.Now().Add(app.Config.Auth.TokenExp).UTC()
+	token, token_err := app.Authenticator.GenerateJWT(user_data.Id.String(), exp)
 	if token_err != nil {
 		app.InternalServerError(w, token_err.Error())
 		return
@@ -231,8 +231,8 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 		Email:    payload.Email,
 		Password: string(bytes),
 	}
-	exp := time.Now().Add(app.Config.auth.tokenExp).UTC()
-	token, token_err := app.authenticator.GenerateJWT(user.Id.String(), exp)
+	exp := time.Now().Add(app.Config.Auth.TokenExp).UTC()
+	token, token_err := app.Authenticator.GenerateJWT(user.Id.String(), exp)
 	if token_err != nil {
 		app.InternalServerError(w, token_err.Error())
 		return
@@ -374,7 +374,7 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 
 func (app *Application) ActivateUserHandler(w http.ResponseWriter, r *http.Request) {
 	tokenStr := chi.URLParam(r, "token")
-	_, claims_err := app.authenticator.ParseJWT(tokenStr)
+	_, claims_err := app.Authenticator.ParseJWT(tokenStr)
 	if claims_err != nil {
 		app.BadRequestError(w, claims_err.Error())
 		return
