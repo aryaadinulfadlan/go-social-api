@@ -9,4 +9,5 @@ const (
 	StatusMethodNotAllowed    = "METHOD NOT ALLOWED"
 	StatusCreated             = "CREATED"
 	StatusOK                  = "OK"
+	StatusTooManyRequests     = "TOO MANY REQUESTS"
 )

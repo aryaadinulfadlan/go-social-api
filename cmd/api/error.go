@@ -55,3 +55,8 @@ func (app *Application) UnauthorizedError(w http.ResponseWriter, err string) {
 func (app *Application) ForbiddenError(w http.ResponseWriter, err string) {
 	helpers.WriteErrorResponse(w, http.StatusForbidden, internal.StatusForbidden, err)
 }
+func (app *Application) RateLimitExceededResponse(w http.ResponseWriter, r *http.Request, retryAfter string) {
+	app.Logger.Warn("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
+	w.Header().Set("Retry-After", retryAfter)
+	helpers.WriteErrorResponse(w, http.StatusTooManyRequests, internal.StatusTooManyRequests, "Rate limit exceeded, retry after: "+retryAfter)
+}

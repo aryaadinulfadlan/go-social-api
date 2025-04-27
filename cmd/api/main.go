@@ -6,6 +6,7 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/env"
+	ratelimiter "github.com/aryaadinulfadlan/go-social-api/internal/rate_limiter"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store/cache"
 	"github.com/sirupsen/logrus"
@@ -33,6 +34,11 @@ func main() {
 		Redis: RedisConfig{
 			Addr: env.Envs.REDIS_ADDR,
 		},
+		RateLimiter: ratelimiter.Config{
+			RequestsPerTimeFrame: env.Envs.RATE_LIMITER_REQUEST_COUNT,
+			TimeFrame:            time.Second * 5,
+			Enabled:              env.Envs.RATE_LIMITER_ENABLED,
+		},
 	}
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
@@ -44,12 +50,17 @@ func main() {
 	redisClient := cache.NewRedisClient(env.Envs.REDIS_ADDR)
 	cacheStorage := cache.NewCacheStorage(redisClient)
 	jwtAuthenticator := auth.NewJWTAuthenticator(env.Envs.SECRET_KEY)
+	rateLimiter := ratelimiter.NewFixedWindowLimiter(
+		config.RateLimiter.RequestsPerTimeFrame,
+		config.RateLimiter.TimeFrame,
+	)
 	app := &Application{
 		Config:        config,
 		Store:         *store,
 		Logger:        logger,
 		Authenticator: jwtAuthenticator,
 		CacheStorage:  *cacheStorage,
+		RateLimiter:   rateLimiter,
 	}
 	mux := app.Mount()
 	logger.Fatal(app.Run(mux))

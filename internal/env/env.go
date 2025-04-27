@@ -6,15 +6,17 @@ import (
 )
 
 type Config struct {
-	ADDR                string
-	DATABASE_URL        string
-	DB_MAX_OPEN_CONNS   int
-	DB_MAX_IDLE_CONNS   int
-	DB_MAX_IDLE_TIME    string
-	SECRET_KEY          string
-	AUTH_BASIC_USERNAME string
-	AUTH_BASIC_PASSWORD string
-	REDIS_ADDR          string
+	ADDR                       string
+	DATABASE_URL               string
+	DB_MAX_OPEN_CONNS          int
+	DB_MAX_IDLE_CONNS          int
+	DB_MAX_IDLE_TIME           string
+	SECRET_KEY                 string
+	AUTH_BASIC_USERNAME        string
+	AUTH_BASIC_PASSWORD        string
+	REDIS_ADDR                 string
+	RATE_LIMITER_REQUEST_COUNT int
+	RATE_LIMITER_ENABLED       bool
 }
 
 var Envs = GetEnv()
@@ -30,14 +32,16 @@ func GetEnv() Config {
 		logger.Fatalln("Cannot load env file:", err)
 	}
 	return Config{
-		ADDR:                config.GetString("ADDR"),
-		DATABASE_URL:        config.GetString("DATABASE_URL"),
-		DB_MAX_OPEN_CONNS:   config.GetInt("DB_MAX_OPEN_CONNS"),
-		DB_MAX_IDLE_CONNS:   config.GetInt("DB_MAX_IDLE_CONNS"),
-		DB_MAX_IDLE_TIME:    config.GetString("DB_MAX_IDLE_TIME"),
-		SECRET_KEY:          config.GetString("SECRET_KEY"),
-		AUTH_BASIC_USERNAME: config.GetString("AUTH_BASIC_USERNAME"),
-		AUTH_BASIC_PASSWORD: config.GetString("AUTH_BASIC_PASSWORD"),
-		REDIS_ADDR:          config.GetString("REDIS_ADDR"),
+		ADDR:                       config.GetString("ADDR"),
+		DATABASE_URL:               config.GetString("DATABASE_URL"),
+		DB_MAX_OPEN_CONNS:          config.GetInt("DB_MAX_OPEN_CONNS"),
+		DB_MAX_IDLE_CONNS:          config.GetInt("DB_MAX_IDLE_CONNS"),
+		DB_MAX_IDLE_TIME:           config.GetString("DB_MAX_IDLE_TIME"),
+		SECRET_KEY:                 config.GetString("SECRET_KEY"),
+		AUTH_BASIC_USERNAME:        config.GetString("AUTH_BASIC_USERNAME"),
+		AUTH_BASIC_PASSWORD:        config.GetString("AUTH_BASIC_PASSWORD"),
+		REDIS_ADDR:                 config.GetString("REDIS_ADDR"),
+		RATE_LIMITER_REQUEST_COUNT: config.GetInt("RATE_LIMITER_REQUEST_COUNT"),
+		RATE_LIMITER_ENABLED:       config.GetBool("RATE_LIMITER_ENABLED"),
 	}
 }

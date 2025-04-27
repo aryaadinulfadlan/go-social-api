@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
+	ratelimiter "github.com/aryaadinulfadlan/go-social-api/internal/rate_limiter"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store/cache"
 	"github.com/go-chi/chi/v5"
@@ -35,11 +36,12 @@ type RedisConfig struct {
 	Addr string
 }
 type Config struct {
-	Addr  string
-	DB    DBConfig
-	Mail  MailConfig
-	Auth  AuthConfig
-	Redis RedisConfig
+	Addr        string
+	DB          DBConfig
+	Mail        MailConfig
+	Auth        AuthConfig
+	Redis       RedisConfig
+	RateLimiter ratelimiter.Config
 }
 type Application struct {
 	Config
@@ -47,6 +49,7 @@ type Application struct {
 	Logger        *logrus.Logger
 	Authenticator auth.Authenticator
 	CacheStorage  cache.CacheStorage
+	RateLimiter   ratelimiter.Limiter
 }
 
 type userKey string
@@ -70,6 +73,7 @@ func (app *Application) Mount() *chi.Mux {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(3 * time.Second))
+	r.Use(app.RateLimiterMiddleware)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		app.NotFoundError(w, fmt.Sprintf("Route %s %s is not exists", r.Method, r.URL.Path))
@@ -78,7 +82,8 @@ func (app *Application) Mount() *chi.Mux {
 		app.MethodNotAllowedError(w, fmt.Sprintf("%s %s is not valid", r.Method, r.URL.Path))
 	})
 	r.Route("/v1", func(r chi.Router) {
-		r.With(app.BasicAuthMiddleware()).Get("/test", app.Test)
+		r.With(app.BasicAuthMiddleware()).Get("/basic", app.BasicAuthentication)
+		r.Get("/ping", app.Ping)
 		r.Route("/posts", func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
 			r.With(app.RequirePermission("post:create")).Post("/", app.CreatePostHandler)
