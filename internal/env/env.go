@@ -15,6 +15,9 @@ type Config struct {
 	AUTH_BASIC_USERNAME        string
 	AUTH_BASIC_PASSWORD        string
 	REDIS_ADDR                 string
+	REDIS_PASSWORD             string
+	REDIS_DB                   int
+	REDIS_PROTOCOL             int
 	RATE_LIMITER_REQUEST_COUNT int
 	RATE_LIMITER_ENABLED       bool
 }
@@ -41,6 +44,9 @@ func GetEnv() Config {
 		AUTH_BASIC_USERNAME:        config.GetString("AUTH_BASIC_USERNAME"),
 		AUTH_BASIC_PASSWORD:        config.GetString("AUTH_BASIC_PASSWORD"),
 		REDIS_ADDR:                 config.GetString("REDIS_ADDR"),
+		REDIS_PASSWORD:             config.GetString("REDIS_PASSWORD"),
+		REDIS_DB:                   config.GetInt("REDIS_DB"),
+		REDIS_PROTOCOL:             config.GetInt("REDIS_PROTOCOL"),
 		RATE_LIMITER_REQUEST_COUNT: config.GetInt("RATE_LIMITER_REQUEST_COUNT"),
 		RATE_LIMITER_ENABLED:       config.GetBool("RATE_LIMITER_ENABLED"),
 	}

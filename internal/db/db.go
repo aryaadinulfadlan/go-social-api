@@ -2,36 +2,36 @@ package db
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func OpenConnection(dbUrl string, maxOpenConns int, maxIdleConns int, maxIdleTime string) (*gorm.DB, error) {
-	dialect := postgres.Open(dbUrl)
-	db, err := gorm.Open(dialect, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-		// SkipDefaultTransaction: true,
+var DB *gorm.DB
+
+func Init() {
+	dialect := postgres.Open(config.DB.DATABASE_URL)
+	var err error
+	DB, err = gorm.Open(dialect, &gorm.Config{
+		Logger:      logger.Default.LogMode(logger.Info),
 		PrepareStmt: true,
-		// IMPLEMENT SELECT FIELD
-		// IMPLEMENT LAZY RESULTS USING ROWS() INSTEAD OF FIND() - JIKA DATA BESAR
-		// IMPLEMENT TABLE NORMALIZATION (TABLE SPLITTING)
 	})
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to connect database: %v", err)
 	}
 	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	sqlDB, err := db.DB()
+	sqlDB, errSql := DB.DB()
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to connect database: %v", errSql)
 	}
-	duration, _ := time.ParseDuration(maxIdleTime)
-	sqlDB.SetMaxOpenConns(maxOpenConns)
-	sqlDB.SetMaxIdleConns(maxIdleConns)
+	duration, _ := time.ParseDuration(config.DB.MaxIdleTime)
+	sqlDB.SetMaxOpenConns(config.DB.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(config.DB.MaxIdleConns)
 	sqlDB.SetConnMaxIdleTime(duration)
 	sqlDB.SetConnMaxLifetime(30 * time.Minute)
-	return db, nil
 }
