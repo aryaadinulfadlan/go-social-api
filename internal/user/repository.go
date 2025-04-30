@@ -79,9 +79,6 @@ func (repository *RepositoryImplementation) GetById(ctx context.Context, userId 
 	err := repository.gorm.WithContext(ctx).Where("id = ?", userId).
 		Preload("Role").Take(&user).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	return &user, nil

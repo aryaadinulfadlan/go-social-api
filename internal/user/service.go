@@ -169,9 +169,6 @@ func (service *ServiceImplementation) FollowUnfollow(ctx context.Context, userCo
 	if err != nil {
 		return nil, err
 	}
-	if userTarget == nil {
-		return nil, internal.ErrNotFound
-	}
 	message, err := service.repository.FollowUnfollow(ctx, userTarget.Id, userContext.Id)
 	if err != nil {
 		return nil, err
@@ -189,9 +186,6 @@ func (service *ServiceImplementation) GetConnections(ctx context.Context, userId
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
-		return nil, internal.ErrNotFound
-	}
 	users, err := service.repository.GetConnections(ctx, user.Id, actionType)
 	if err != nil {
 		return nil, err
@@ -204,9 +198,6 @@ func (service *ServiceImplementation) Activate(ctx context.Context, tokenStr str
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
-		return nil, internal.ErrNotFound
-	}
 	user.IsActivated = true
 	user, err = service.repository.Activate(ctx, user)
 	if err != nil {
@@ -216,12 +207,9 @@ func (service *ServiceImplementation) Activate(ctx context.Context, tokenStr str
 }
 
 func (service *ServiceImplementation) Delete(ctx context.Context, userId uuid.UUID) error {
-	user, err := service.repository.GetById(ctx, userId)
+	_, err := service.repository.GetById(ctx, userId)
 	if err != nil {
 		return err
-	}
-	if user == nil {
-		return internal.ErrNotFound
 	}
 	err = service.repository.Delete(ctx, userId)
 	if err != nil {

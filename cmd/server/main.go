@@ -9,6 +9,7 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
 	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
+	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/redis"
 	"github.com/aryaadinulfadlan/go-social-api/internal/role"
 	"github.com/aryaadinulfadlan/go-social-api/internal/router"
@@ -30,11 +31,16 @@ func main() {
 	userService := user.NewService(authenticator, userRepo, roleRepo, userInvitationRepo)
 	userHandler := user.NewHandler(authenticator, userService)
 
+	postRepo := post.NewRepository(db.DB)
+	postService := post.NewService(postRepo)
+	postHandler := post.NewHandler(postService)
+
 	r := router.NewRouter(
 		userHandler,
 		authenticator,
 		userRepo,
 		permissionRepo,
+		postHandler,
 	)
 	server := &http.Server{
 		Addr:         config.Addr,

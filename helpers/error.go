@@ -52,6 +52,13 @@ func ValidateStruct(payload any) ([]string, error) {
 	}
 	return nil, nil
 }
+func GenerateWebResponse(code int, status string, data any) *internal.WebResponse {
+	return &internal.WebResponse{
+		Code:   code,
+		Status: status,
+		Data:   data,
+	}
+}
 func InternalServerError(w http.ResponseWriter, err string) {
 	WriteErrorResponse(w, http.StatusInternalServerError, internal.StatusInternalServerError, err)
 }

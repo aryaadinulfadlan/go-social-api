@@ -8,6 +8,7 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
+	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/user"
 	"github.com/aryaadinulfadlan/go-social-api/middleware"
 	"github.com/go-chi/chi/v5"
@@ -20,6 +21,7 @@ func NewRouter(
 	authenticator auth.Authenticator,
 	userRepository user.Repository,
 	permissionRepository permission.Repository,
+	postHandler post.Handler,
 ) http.Handler {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
@@ -49,13 +51,13 @@ func NewRouter(
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("PONG"))
 		})
-		// r.Route("/posts", func(r chi.Router) {
-		// 	r.Use(app.AuthTokenMiddleware)
-		// 	r.With(app.RequirePermission("post:create")).Post("/", app.CreatePostHandler)
-		// 	r.With(app.RequirePermission("post:detail")).Get("/{postId}", app.GetPostHandler)
-		// 	r.With(app.RequirePermission("post:update")).Patch("/{postId}", app.UpdatePostHandler)
-		// 	r.With(app.RequirePermission("post:delete")).Delete("/{postId}", app.DeletePostHandler)
-		// })
+		r.Route("/posts", func(r chi.Router) {
+			r.Use(middleware.AuthBearerMiddleware(authenticator, userRepository))
+			r.With(middleware.RequirePermission(permissionRepository, "post:create")).Post("/", postHandler.Create)
+			r.With(middleware.RequirePermission(permissionRepository, "post:detail")).Get("/{postId}", postHandler.GetDetail)
+			r.With(middleware.RequirePermission(permissionRepository, "post:update")).Patch("/{postId}", postHandler.Update)
+			r.With(middleware.RequirePermission(permissionRepository, "post:delete")).Delete("/{postId}", postHandler.Delete)
+		})
 		r.Route("/users", func(r chi.Router) {
 			r.Use(middleware.AuthBearerMiddleware(authenticator, userRepository))
 			r.With(middleware.RequirePermission(permissionRepository, "user:detail")).Get("/{userId}", userHandler.GetDetail)

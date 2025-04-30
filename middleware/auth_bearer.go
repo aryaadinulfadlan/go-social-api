@@ -7,6 +7,7 @@ import (
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/aryaadinulfadlan/go-social-api/internal/user"
 	"github.com/google/uuid"
 )
@@ -41,7 +42,7 @@ func AuthBearerMiddleware(authenticator auth.Authenticator, userRepository user.
 				helpers.UnauthorizedError(w, err.Error())
 				return
 			}
-			ctx = context.WithValue(ctx, user.UserCtx, cachedUser)
+			ctx = context.WithValue(ctx, shared.UserCtx, cachedUser)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

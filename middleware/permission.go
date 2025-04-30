@@ -5,17 +5,18 @@ import (
 	"slices"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
+	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
-	"github.com/aryaadinulfadlan/go-social-api/internal/user"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/google/uuid"
 )
 
 func RequirePermission(permissionRepository permission.Repository, permission string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user := user.GetUserFromContext(r)
+			user := shared.GetUserFromContext(r)
 			if !CheckUserPermission(permissionRepository, permission, r, user.Id) {
-				helpers.ForbiddenError(w, "You do not have permission to access this resource.")
+				helpers.ForbiddenError(w, internal.ErrForbidden.Error())
 				return
 			}
 			next.ServeHTTP(w, r)
@@ -24,7 +25,7 @@ func RequirePermission(permissionRepository permission.Repository, permission st
 }
 
 func CheckUserPermission(permissionRepository permission.Repository, permission string, r *http.Request, userID uuid.UUID) bool {
-	user := user.GetUserFromContext(r)
+	user := shared.GetUserFromContext(r)
 	permissions, err := permissionRepository.GetPermissionNamesByRoleId(r.Context(), user.RoleId)
 	if err != nil {
 		return false

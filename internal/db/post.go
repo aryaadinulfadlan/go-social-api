@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type Post struct {
@@ -23,4 +24,9 @@ type PostWithMetadata struct {
 	Post
 	Username      string `json:"username"`
 	CommentsCount int64  `json:"comments_count"`
+}
+
+func (post *Post) BeforeCreate(db *gorm.DB) (err error) {
+	post.Id = uuid.New()
+	return
 }

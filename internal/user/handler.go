@@ -8,8 +8,8 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
-	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/post"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -39,15 +39,6 @@ func NewHandler(authenticator auth.Authenticator, service Service) Handler {
 	}
 }
 
-type userKey string
-
-var UserCtx userKey = "user"
-
-func GetUserFromContext(r *http.Request) *db.User {
-	user := r.Context().Value(UserCtx).(*db.User)
-	return user
-}
-
 func (handler *HandlerImplementation) CreateAndInvite(w http.ResponseWriter, r *http.Request) {
 	var payload CreateUserPayload
 	err := helpers.ReadFromRequestBody(r, &payload)
@@ -57,12 +48,8 @@ func (handler *HandlerImplementation) CreateAndInvite(w http.ResponseWriter, r *
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		errorResponse := internal.WebResponse{
-			Code:   http.StatusBadRequest,
-			Status: internal.StatusBadRequest,
-			Data:   errMessages,
-		}
-		helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
 	ctx := r.Context()
@@ -76,12 +63,8 @@ func (handler *HandlerImplementation) CreateAndInvite(w http.ResponseWriter, r *
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
-		Data:   user,
-	}
-	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
+	response := helpers.GenerateWebResponse(http.StatusCreated, internal.StatusCreated, user)
+	helpers.WriteToResponseBody(w, http.StatusCreated, response)
 }
 
 func (handler *HandlerImplementation) GetDetail(w http.ResponseWriter, r *http.Request) {
@@ -101,12 +84,8 @@ func (handler *HandlerImplementation) GetDetail(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   user,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, user)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) Login(w http.ResponseWriter, r *http.Request) {
@@ -118,12 +97,8 @@ func (handler *HandlerImplementation) Login(w http.ResponseWriter, r *http.Reque
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		errorResponse := internal.WebResponse{
-			Code:   http.StatusBadRequest,
-			Status: internal.StatusBadRequest,
-			Data:   errMessages,
-		}
-		helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
 	ctx := r.Context()
@@ -139,12 +114,8 @@ func (handler *HandlerImplementation) Login(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   loginSuccess,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, loginSuccess)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) ResendActivation(w http.ResponseWriter, r *http.Request) {
@@ -156,12 +127,8 @@ func (handler *HandlerImplementation) ResendActivation(w http.ResponseWriter, r 
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		errorResponse := internal.WebResponse{
-			Code:   http.StatusBadRequest,
-			Status: internal.StatusBadRequest,
-			Data:   errMessages,
-		}
-		helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
 	ctx := r.Context()
@@ -177,12 +144,8 @@ func (handler *HandlerImplementation) ResendActivation(w http.ResponseWriter, r 
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
-		Data:   resendActivationSuccess,
-	}
-	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
+	response := helpers.GenerateWebResponse(http.StatusCreated, internal.StatusCreated, resendActivationSuccess)
+	helpers.WriteToResponseBody(w, http.StatusCreated, response)
 }
 
 func (handler *HandlerImplementation) FollowUnfollow(w http.ResponseWriter, r *http.Request) {
@@ -192,23 +155,19 @@ func (handler *HandlerImplementation) FollowUnfollow(w http.ResponseWriter, r *h
 		return
 	}
 	ctx := r.Context()
-	userContext := GetUserFromContext(r)
+	userContext := shared.GetUserFromContext(r)
 	followUnfollowSuccess, err := handler.service.FollowUnfollow(ctx, userContext, userId)
 	if err != nil {
 		switch err {
-		case internal.ErrNotFound:
+		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   followUnfollowSuccess,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, followUnfollowSuccess)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) GetConnections(w http.ResponseWriter, r *http.Request) {
@@ -223,19 +182,15 @@ func (handler *HandlerImplementation) GetConnections(w http.ResponseWriter, r *h
 	users, err := handler.service.GetConnections(ctx, userId, actionType)
 	if err != nil {
 		switch err {
-		case internal.ErrNotFound:
+		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   users,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, users)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) Activate(w http.ResponseWriter, r *http.Request) {
@@ -249,19 +204,15 @@ func (handler *HandlerImplementation) Activate(w http.ResponseWriter, r *http.Re
 	user, err := handler.service.Activate(ctx, tokenStr)
 	if err != nil {
 		switch err {
-		case internal.ErrNotFound:
+		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   user,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, user)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) Delete(w http.ResponseWriter, r *http.Request) {
@@ -274,19 +225,15 @@ func (handler *HandlerImplementation) Delete(w http.ResponseWriter, r *http.Requ
 	err := handler.service.Delete(ctx, userId)
 	if err != nil {
 		switch err {
-		case internal.ErrNotFound:
+		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   "Resource deleted successfully.",
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, "Resource deleted successfully.")
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
 func (handler *HandlerImplementation) GetFeeds(w http.ResponseWriter, r *http.Request) {
@@ -302,25 +249,17 @@ func (handler *HandlerImplementation) GetFeeds(w http.ResponseWriter, r *http.Re
 	}
 	errMessages, err := helpers.ValidateStruct(params)
 	if err != nil {
-		errorResponse := internal.WebResponse{
-			Code:   http.StatusBadRequest,
-			Status: internal.StatusBadRequest,
-			Data:   errMessages,
-		}
-		helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
 	ctx := r.Context()
-	userContext := GetUserFromContext(r)
+	userContext := shared.GetUserFromContext(r)
 	paginatedFeeds, err := handler.service.GetFeeds(ctx, userContext.Id, *params)
 	if err != nil {
 		helpers.InternalServerError(w, err.Error())
 		return
 	}
-	web_response := internal.WebResponse{
-		Code:   http.StatusOK,
-		Status: internal.StatusOK,
-		Data:   paginatedFeeds,
-	}
-	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
+	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, paginatedFeeds)
+	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
