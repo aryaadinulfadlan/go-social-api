@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
+	"github.com/aryaadinulfadlan/go-social-api/internal/comment"
 	"github.com/aryaadinulfadlan/go-social-api/internal/config"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
@@ -35,12 +36,17 @@ func main() {
 	postService := post.NewService(postRepo)
 	postHandler := post.NewHandler(postService)
 
+	commentRepo := comment.NewRepository(db.DB)
+	commentService := comment.NewService(commentRepo, postRepo)
+	commentHandler := comment.NewHandler(commentService)
+
 	r := router.NewRouter(
 		userHandler,
 		authenticator,
 		userRepo,
 		permissionRepo,
 		postHandler,
+		commentHandler,
 	)
 	server := &http.Server{
 		Addr:         config.Addr,

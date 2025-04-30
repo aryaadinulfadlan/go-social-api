@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/go-chi/chi/v5"
@@ -31,7 +31,7 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -53,7 +53,7 @@ func (app *Application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
+		Status: shared.StatusCreated,
 		Data:   post,
 	}
 	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
@@ -77,7 +77,7 @@ func (app *Application) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   post_data,
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -107,7 +107,7 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -138,7 +138,7 @@ func (app *Application) UpdatePostHandler(w http.ResponseWriter, r *http.Request
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   post_data,
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -172,7 +172,7 @@ func (app *Application) DeletePostHandler(w http.ResponseWriter, r *http.Request
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   "Resource deleted successfully.",
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -199,7 +199,7 @@ func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Reques
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -216,7 +216,7 @@ func (app *Application) GetPostFeedHandler(w http.ResponseWriter, r *http.Reques
 	pagination := model.NewPaginationMeta(params.Page, params.PerPage, int(total))
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data: model.PaginationResponse{
 			Items:      feed,
 			Pagination: pagination,

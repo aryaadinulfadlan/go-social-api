@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/go-chi/chi/v5"
@@ -40,7 +40,7 @@ func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.R
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -88,7 +88,7 @@ func (app *Application) ResendActivationHandler(w http.ResponseWriter, r *http.R
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
+		Status: shared.StatusCreated,
 		Data: model.ResendActivationSuccess{
 			Id:       user_data.Id,
 			Name:     user_data.Name,
@@ -117,7 +117,7 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -151,7 +151,7 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data: model.LoginSuccess{
 			User: model.UserResponse{
 				Id:       user_data.Id,
@@ -183,7 +183,7 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -249,7 +249,7 @@ func (app *Application) CreateUserHandler(w http.ResponseWriter, r *http.Request
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
+		Status: shared.StatusCreated,
 		Data:   user,
 	}
 	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)
@@ -273,7 +273,7 @@ func (app *Application) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   user_data,
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -302,7 +302,7 @@ func (app *Application) DeleteUserHandler(w http.ResponseWriter, r *http.Request
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   "Resource deleted successfully.",
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -332,7 +332,7 @@ func (app *Application) FollowUnfollowUserHandler(w http.ResponseWriter, r *http
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data: map[string]any{
 			"senderId": user.Id,
 			"targetId": target_data.Id,
@@ -366,7 +366,7 @@ func (app *Application) GetConnectionsHandler(w http.ResponseWriter, r *http.Req
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   users,
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)
@@ -397,7 +397,7 @@ func (app *Application) ActivateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusOK,
-		Status: internal.StatusOK,
+		Status: shared.StatusOK,
 		Data:   updated_user,
 	}
 	helpers.WriteToResponseBody(w, http.StatusOK, web_response)

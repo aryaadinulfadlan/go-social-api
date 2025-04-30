@@ -3,8 +3,8 @@ package post
 import (
 	"context"
 
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/google/uuid"
 )
 
@@ -49,7 +49,7 @@ func (service *ServiceImplementation) Update(ctx context.Context, postId uuid.UU
 		return nil, err
 	}
 	if post.UserId != userContext.Id && userContext.Role.Name != "admin" {
-		return nil, internal.ErrForbidden
+		return nil, shared.ErrForbidden
 	}
 	post.Title = payload.Title
 	post.Content = payload.Content
@@ -66,7 +66,7 @@ func (service *ServiceImplementation) Delete(ctx context.Context, postId uuid.UU
 		return err
 	}
 	if post.UserId != userContext.Id && userContext.Role.Name != "admin" {
-		return internal.ErrForbidden
+		return shared.ErrForbidden
 	}
 	err = service.repository.Delete(ctx, post.Id)
 	if err != nil {

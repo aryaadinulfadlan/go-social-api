@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/aryaadinulfadlan/go-social-api/internal/store"
 	"github.com/aryaadinulfadlan/go-social-api/model"
 	"github.com/go-chi/chi/v5"
@@ -36,7 +36,7 @@ func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Requ
 			}
 			errorResponse := model.WebResponse{
 				Code:   http.StatusBadRequest,
-				Status: internal.StatusBadRequest,
+				Status: shared.StatusBadRequest,
 				Data:   error_messages,
 			}
 			helpers.WriteToResponseBody(w, http.StatusBadRequest, errorResponse)
@@ -66,7 +66,7 @@ func (app *Application) CreateCommentHandler(w http.ResponseWriter, r *http.Requ
 	}
 	web_response := model.WebResponse{
 		Code:   http.StatusCreated,
-		Status: internal.StatusCreated,
+		Status: shared.StatusCreated,
 		Data:   comment,
 	}
 	helpers.WriteToResponseBody(w, http.StatusCreated, web_response)

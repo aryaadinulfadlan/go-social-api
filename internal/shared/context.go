@@ -11,6 +11,9 @@ type userKey string
 var UserCtx userKey = "user"
 
 func GetUserFromContext(r *http.Request) *db.User {
-	user := r.Context().Value(UserCtx).(*db.User)
+	user, ok := r.Context().Value(UserCtx).(*db.User)
+	if !ok {
+		return nil
+	}
 	return user
 }

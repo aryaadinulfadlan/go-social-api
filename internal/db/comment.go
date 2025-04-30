@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Comment struct {
@@ -15,4 +16,9 @@ type Comment struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	User      *User     `gorm:"constraint:OnDelete:CASCADE;" json:"user,omitempty"`
 	Post      *Post     `gorm:"constraint:OnDelete:CASCADE;" json:"post,omitempty"`
+}
+
+func (comment *Comment) BeforeCreate(db *gorm.DB) (err error) {
+	comment.Id = uuid.New()
+	return
 }

@@ -38,7 +38,7 @@ func SetUser(ctx context.Context, user *db.User) error {
 	return RedisClient.SetEx(ctx, cacheKey, json, UserExpiredTime).Err()
 }
 
-func Delete(ctx context.Context, userId string) {
+func DeleteUser(ctx context.Context, userId string) error {
 	cacheKey := fmt.Sprintf("user-%s", userId)
-	RedisClient.Del(ctx, cacheKey)
+	return RedisClient.Del(ctx, cacheKey).Err()
 }

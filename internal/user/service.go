@@ -4,12 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/config"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
+	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
 	"github.com/aryaadinulfadlan/go-social-api/internal/post"
+	"github.com/aryaadinulfadlan/go-social-api/internal/redis"
 	"github.com/aryaadinulfadlan/go-social-api/internal/role"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	userinvitation "github.com/aryaadinulfadlan/go-social-api/internal/user_invitation"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -24,7 +26,7 @@ type Service interface {
 	GetConnections(ctx context.Context, userId uuid.UUID, actionType string) ([]*db.User, error)
 	Activate(ctx context.Context, tokenStr string) (*db.User, error)
 	Delete(ctx context.Context, userId uuid.UUID) error
-	GetFeeds(ctx context.Context, userId uuid.UUID, params post.PostParams) (*internal.PaginationResponse, error)
+	GetFeeds(ctx context.Context, userId uuid.UUID, params post.PostParams) (*shared.PaginationResponse, error)
 }
 
 type ServiceImplementation struct {
@@ -49,7 +51,7 @@ func (service *ServiceImplementation) CreateAndInvite(ctx context.Context, paylo
 		return nil, err
 	}
 	if user != nil {
-		return nil, internal.ErrUserExists
+		return nil, shared.ErrUserExists
 	}
 	bytes, hash_err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if hash_err != nil {
@@ -98,14 +100,14 @@ func (service *ServiceImplementation) Login(ctx context.Context, payload LoginUs
 		return nil, err
 	}
 	if user == nil {
-		return nil, internal.ErrLoginInvalid
+		return nil, shared.ErrLoginInvalid
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
-		return nil, internal.ErrLoginInvalid
+		return nil, shared.ErrLoginInvalid
 	}
 	if !user.IsActivated {
-		return nil, internal.ErrAccountInactive
+		return nil, shared.ErrAccountInactive
 	}
 	exp := time.Now().Add(config.Auth.TokenExp).UTC()
 	token, err := service.authenticator.GenerateJWT(user.Id.String(), exp)
@@ -131,10 +133,10 @@ func (service *ServiceImplementation) ResendActivation(ctx context.Context, emai
 		return nil, err
 	}
 	if user == nil {
-		return nil, internal.ErrEmailInvalid
+		return nil, shared.ErrEmailInvalid
 	}
 	if user.IsActivated {
-		return nil, internal.ErrAccountActive
+		return nil, shared.ErrAccountActive
 	}
 	err = service.userInvitationRepository.DeleteUserInvitation(ctx, user.Id)
 	if err != nil {
@@ -215,16 +217,19 @@ func (service *ServiceImplementation) Delete(ctx context.Context, userId uuid.UU
 	if err != nil {
 		return err
 	}
+	if err := redis.DeleteUser(ctx, userId.String()); err != nil {
+		logger.Logger.Warnf("Failed to invalidate user cache after delete: %v", err)
+	}
 	return nil
 }
 
-func (service *ServiceImplementation) GetFeeds(ctx context.Context, userId uuid.UUID, params post.PostParams) (*internal.PaginationResponse, error) {
+func (service *ServiceImplementation) GetFeeds(ctx context.Context, userId uuid.UUID, params post.PostParams) (*shared.PaginationResponse, error) {
 	feeds, total, err := service.repository.GetFeeds(ctx, userId, &params)
 	if err != nil {
 		return nil, err
 	}
-	pagination := internal.NewPaginationMeta(params.Page, params.PerPage, int(total))
-	paginatedFeeds := &internal.PaginationResponse{
+	pagination := shared.NewPaginationMeta(params.Page, params.PerPage, int(total))
+	paginatedFeeds := &shared.PaginationResponse{
 		Items:      feeds,
 		Pagination: pagination,
 	}

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -37,7 +36,7 @@ func (handler *HandlerImplementation) Create(w http.ResponseWriter, r *http.Requ
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -48,7 +47,7 @@ func (handler *HandlerImplementation) Create(w http.ResponseWriter, r *http.Requ
 		helpers.InternalServerError(w, err.Error())
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusCreated, internal.StatusCreated, post)
+	response := helpers.GenerateWebResponse(http.StatusCreated, shared.StatusCreated, post)
 	helpers.WriteToResponseBody(w, http.StatusCreated, response)
 }
 func (handler *HandlerImplementation) GetDetail(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +67,7 @@ func (handler *HandlerImplementation) GetDetail(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, post)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, post)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 func (handler *HandlerImplementation) Update(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +85,7 @@ func (handler *HandlerImplementation) Update(w http.ResponseWriter, r *http.Requ
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -97,14 +96,14 @@ func (handler *HandlerImplementation) Update(w http.ResponseWriter, r *http.Requ
 		switch err {
 		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
-		case internal.ErrForbidden:
+		case shared.ErrForbidden:
 			helpers.ForbiddenError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, post)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, post)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 func (handler *HandlerImplementation) Delete(w http.ResponseWriter, r *http.Request) {
@@ -120,13 +119,13 @@ func (handler *HandlerImplementation) Delete(w http.ResponseWriter, r *http.Requ
 		switch err {
 		case gorm.ErrRecordNotFound:
 			helpers.NotFoundError(w, err.Error())
-		case internal.ErrForbidden:
+		case shared.ErrForbidden:
 			helpers.ForbiddenError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, "Resource deleted successfully.")
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, "Resource deleted successfully.")
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }

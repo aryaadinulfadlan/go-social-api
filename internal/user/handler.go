@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
@@ -48,7 +47,7 @@ func (handler *HandlerImplementation) CreateAndInvite(w http.ResponseWriter, r *
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -56,14 +55,14 @@ func (handler *HandlerImplementation) CreateAndInvite(w http.ResponseWriter, r *
 	user, err := handler.service.CreateAndInvite(ctx, payload)
 	if err != nil {
 		switch err {
-		case internal.ErrUserExists:
+		case shared.ErrUserExists:
 			helpers.BadRequestError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusCreated, internal.StatusCreated, user)
+	response := helpers.GenerateWebResponse(http.StatusCreated, shared.StatusCreated, user)
 	helpers.WriteToResponseBody(w, http.StatusCreated, response)
 }
 
@@ -84,7 +83,7 @@ func (handler *HandlerImplementation) GetDetail(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, user)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, user)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -97,7 +96,7 @@ func (handler *HandlerImplementation) Login(w http.ResponseWriter, r *http.Reque
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -105,16 +104,16 @@ func (handler *HandlerImplementation) Login(w http.ResponseWriter, r *http.Reque
 	loginSuccess, err := handler.service.Login(ctx, payload)
 	if err != nil {
 		switch err {
-		case internal.ErrLoginInvalid:
+		case shared.ErrLoginInvalid:
 			helpers.UnauthorizedError(w, err.Error())
-		case internal.ErrAccountInactive:
+		case shared.ErrAccountInactive:
 			helpers.BadRequestError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, loginSuccess)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, loginSuccess)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -127,7 +126,7 @@ func (handler *HandlerImplementation) ResendActivation(w http.ResponseWriter, r 
 	}
 	errMessages, err := helpers.ValidateStruct(payload)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -135,16 +134,16 @@ func (handler *HandlerImplementation) ResendActivation(w http.ResponseWriter, r 
 	resendActivationSuccess, err := handler.service.ResendActivation(ctx, payload.Email)
 	if err != nil {
 		switch err {
-		case internal.ErrEmailInvalid:
+		case shared.ErrEmailInvalid:
 			helpers.NotFoundError(w, err.Error())
-		case internal.ErrAccountActive:
+		case shared.ErrAccountActive:
 			helpers.BadRequestError(w, err.Error())
 		default:
 			helpers.InternalServerError(w, err.Error())
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusCreated, internal.StatusCreated, resendActivationSuccess)
+	response := helpers.GenerateWebResponse(http.StatusCreated, shared.StatusCreated, resendActivationSuccess)
 	helpers.WriteToResponseBody(w, http.StatusCreated, response)
 }
 
@@ -166,7 +165,7 @@ func (handler *HandlerImplementation) FollowUnfollow(w http.ResponseWriter, r *h
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, followUnfollowSuccess)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, followUnfollowSuccess)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -189,7 +188,7 @@ func (handler *HandlerImplementation) GetConnections(w http.ResponseWriter, r *h
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, users)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, users)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -211,7 +210,7 @@ func (handler *HandlerImplementation) Activate(w http.ResponseWriter, r *http.Re
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, user)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, user)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -232,7 +231,7 @@ func (handler *HandlerImplementation) Delete(w http.ResponseWriter, r *http.Requ
 		}
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, "Resource deleted successfully.")
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, "Resource deleted successfully.")
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }
 
@@ -249,7 +248,7 @@ func (handler *HandlerImplementation) GetFeeds(w http.ResponseWriter, r *http.Re
 	}
 	errMessages, err := helpers.ValidateStruct(params)
 	if err != nil {
-		response := helpers.GenerateWebResponse(http.StatusBadRequest, internal.StatusBadRequest, errMessages)
+		response := helpers.GenerateWebResponse(http.StatusBadRequest, shared.StatusBadRequest, errMessages)
 		helpers.WriteToResponseBody(w, http.StatusBadRequest, response)
 		return
 	}
@@ -260,6 +259,6 @@ func (handler *HandlerImplementation) GetFeeds(w http.ResponseWriter, r *http.Re
 		helpers.InternalServerError(w, err.Error())
 		return
 	}
-	response := helpers.GenerateWebResponse(http.StatusOK, internal.StatusOK, paginatedFeeds)
+	response := helpers.GenerateWebResponse(http.StatusOK, shared.StatusOK, paginatedFeeds)
 	helpers.WriteToResponseBody(w, http.StatusOK, response)
 }

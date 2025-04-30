@@ -7,6 +7,7 @@ import (
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
+	"github.com/aryaadinulfadlan/go-social-api/internal/comment"
 	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
 	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/user"
@@ -22,6 +23,7 @@ func NewRouter(
 	userRepository user.Repository,
 	permissionRepository permission.Repository,
 	postHandler post.Handler,
+	commentHandler comment.Handler,
 ) http.Handler {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
@@ -37,7 +39,7 @@ func NewRouter(
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.Timeout(3 * time.Second))
-	// r.Use(app.RateLimiterMiddleware)
+	r.Use(middleware.RateLimiter())
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		helpers.NotFoundError(w, fmt.Sprintf("Route %s %s is not exists", r.Method, r.URL.Path))
 	})
@@ -73,10 +75,10 @@ func NewRouter(
 			r.Post("/resend-activation", userHandler.ResendActivation)
 			r.Put("/activate/{token}", userHandler.Activate)
 		})
-		// r.Route("/comments", func(r chi.Router) {
-		// 	r.Use(app.AuthTokenMiddleware)
-		// 	r.With(app.RequirePermission("comment:create")).Post("/{postId}", app.CreateCommentHandler)
-		// })
+		r.Route("/comments", func(r chi.Router) {
+			r.Use(middleware.AuthBearerMiddleware(authenticator, userRepository))
+			r.With(middleware.RequirePermission(permissionRepository, "comment:create")).Post("/{postId}", commentHandler.Create)
+		})
 	})
 	return r
 }

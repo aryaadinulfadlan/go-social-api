@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal"
 	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/google/uuid"
@@ -16,7 +15,7 @@ func RequirePermission(permissionRepository permission.Repository, permission st
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			user := shared.GetUserFromContext(r)
 			if !CheckUserPermission(permissionRepository, permission, r, user.Id) {
-				helpers.ForbiddenError(w, internal.ErrForbidden.Error())
+				helpers.ForbiddenError(w, shared.ErrForbidden.Error())
 				return
 			}
 			next.ServeHTTP(w, r)

@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/aryaadinulfadlan/go-social-api/internal"
+	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
+	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -52,33 +53,32 @@ func ValidateStruct(payload any) ([]string, error) {
 	}
 	return nil, nil
 }
-func GenerateWebResponse(code int, status string, data any) *internal.WebResponse {
-	return &internal.WebResponse{
+func GenerateWebResponse(code int, status string, data any) *shared.WebResponse {
+	return &shared.WebResponse{
 		Code:   code,
 		Status: status,
 		Data:   data,
 	}
 }
 func InternalServerError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusInternalServerError, internal.StatusInternalServerError, err)
+	WriteErrorResponse(w, http.StatusInternalServerError, shared.StatusInternalServerError, err)
 }
 func NotFoundError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusNotFound, internal.StatusNotFound, err)
+	WriteErrorResponse(w, http.StatusNotFound, shared.StatusNotFound, err)
 }
 func MethodNotAllowedError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusMethodNotAllowed, internal.StatusMethodNotAllowed, err)
+	WriteErrorResponse(w, http.StatusMethodNotAllowed, shared.StatusMethodNotAllowed, err)
 }
 func BadRequestError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusBadRequest, internal.StatusBadRequest, err)
+	WriteErrorResponse(w, http.StatusBadRequest, shared.StatusBadRequest, err)
 }
 func UnauthorizedError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusUnauthorized, internal.StatusUnauthorized, err)
+	WriteErrorResponse(w, http.StatusUnauthorized, shared.StatusUnauthorized, err)
 }
 func ForbiddenError(w http.ResponseWriter, err string) {
-	WriteErrorResponse(w, http.StatusForbidden, internal.StatusForbidden, err)
+	WriteErrorResponse(w, http.StatusForbidden, shared.StatusForbidden, err)
 }
-func RateLimitExceededResponse(w http.ResponseWriter, r *http.Request, retryAfter string) {
-	// app.Logger.Warn("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
-	w.Header().Set("Retry-After", retryAfter)
-	WriteErrorResponse(w, http.StatusTooManyRequests, internal.StatusTooManyRequests, "Rate limit exceeded, retry after: "+retryAfter)
+func RateLimitExceededResponse(w http.ResponseWriter, r *http.Request, err string) {
+	logger.Logger.Warn("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
+	WriteErrorResponse(w, http.StatusTooManyRequests, shared.StatusTooManyRequests, err)
 }

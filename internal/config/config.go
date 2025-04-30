@@ -3,11 +3,12 @@ package config
 import "github.com/aryaadinulfadlan/go-social-api/internal/env"
 
 var (
-	Addr      string
-	SecretKey string
-	DB        *DBConfig
-	Auth      *AuthConfig
-	Redis     *RedisConfig
+	Addr        string
+	SecretKey   string
+	DB          *DBConfig
+	Auth        *AuthConfig
+	Redis       *RedisConfig
+	RateLimiter *RateLimiterConfig
 )
 
 func Load() {
@@ -16,4 +17,5 @@ func Load() {
 	DB = LoadDBConfig()
 	Auth = LoadAuthConfig()
 	Redis = LoadRedisConfig()
+	RateLimiter = LoadRateLimiterConfig()
 }
