@@ -8,6 +8,7 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/internal/config"
 	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
 	ratelimiter "github.com/aryaadinulfadlan/go-social-api/internal/rate_limiter"
+	"github.com/aryaadinulfadlan/go-social-api/internal/redis"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 )
 
@@ -23,7 +24,7 @@ func RateLimiter() func(http.Handler) http.Handler {
 					ip := r.RemoteAddr
 					key = fmt.Sprintf("rl:ip:%s", ip)
 				}
-				allowed, err := ratelimiter.AllowRequest(r.Context(), key, config.RateLimiter.Max, config.RateLimiter.Duration)
+				allowed, err := ratelimiter.AllowRequest(r.Context(), redis.RedisClient, key, config.RateLimiter.Max, config.RateLimiter.Duration)
 				if err != nil {
 					logger.Logger.Errorf("Rate limiter error: %v", err)
 					helpers.InternalServerError(w, err.Error())

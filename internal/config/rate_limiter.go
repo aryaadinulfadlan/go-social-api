@@ -15,7 +15,7 @@ type RateLimiterConfig struct {
 func LoadRateLimiterConfig() *RateLimiterConfig {
 	timeout, err := time.ParseDuration(env.Envs.RATE_LIMITER_DURATION)
 	if err != nil {
-		timeout = 2 * time.Second
+		timeout = time.Second
 	}
 	return &RateLimiterConfig{
 		Max:      env.Envs.RATE_LIMITER_MAX,

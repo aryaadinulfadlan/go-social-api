@@ -79,6 +79,6 @@ func ForbiddenError(w http.ResponseWriter, err string) {
 	WriteErrorResponse(w, http.StatusForbidden, shared.StatusForbidden, err)
 }
 func RateLimitExceededResponse(w http.ResponseWriter, r *http.Request, err string) {
-	logger.Logger.Warn("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
+	logger.Logger.Warnf("rate limit exceeded, method:%s path:%s", r.Method, r.URL.Path)
 	WriteErrorResponse(w, http.StatusTooManyRequests, shared.StatusTooManyRequests, err)
 }

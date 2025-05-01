@@ -1,7 +1,7 @@
 package env
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
 	"github.com/spf13/viper"
 )
 
@@ -26,14 +26,15 @@ type Config struct {
 var Envs = GetEnv()
 
 func GetEnv() Config {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.JSONFormatter{})
 	config := viper.New()
-	config.SetConfigFile(".env")
+	config.SetConfigName(".env")
+	config.SetConfigType("env")
+	config.AddConfigPath(".")
+	config.AddConfigPath("..")
 	config.AddConfigPath("../../")
 	err := config.ReadInConfig()
 	if err != nil {
-		logger.Fatalln("Cannot load env file:", err)
+		logger.Logger.Fatalln("Cannot load env file:", err)
 	}
 	return Config{
 		ADDR:                  config.GetString("ADDR"),
