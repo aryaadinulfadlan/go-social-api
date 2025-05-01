@@ -50,6 +50,9 @@ func NewRouter(
 		r.With(middleware.AuthBasicMiddleware()).Get("/basic", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Authenticated as Basic Authentication"))
 		})
+		r.With(middleware.AuthBearerMiddleware(authenticator, userRepository)).Get("/bearer", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Authenticated as Bearer Authentication"))
+		})
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("PONG"))
 		})

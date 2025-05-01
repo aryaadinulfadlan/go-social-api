@@ -2,6 +2,7 @@ package tests
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/comment"
@@ -48,4 +49,14 @@ func SetupTest() http.Handler {
 		commentHandler,
 	)
 	return r
+}
+
+func GenerateJWT(userId string) (string, error) {
+	authenticator := auth.NewJWTAuthenticator(config.SecretKey)
+	exp := time.Now().Add(config.Auth.TokenExp).UTC()
+	token, err := authenticator.GenerateJWT(userId, exp)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
