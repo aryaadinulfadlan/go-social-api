@@ -1,0 +1,33 @@
+- SERVICE MOCK ?
+- test yang mock untuk handler/service dan integration untuk repo, itu praktik terbaik.
+
+func TestGetUserByID(t *testing.T) {
+	router := setupTestRouter()
+
+	req, _ := http.NewRequest("GET", "/api/users/123", nil)
+	resp := httptest.NewRecorder()
+
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Errorf("expected status 200 OK, got %d", resp.Code)
+	}
+}
+
+func TestGetUserByID(t *testing.T) {
+	router := setupTestRouter()
+	mockRepo := &mocks.UserRepository{}
+
+	// Atur behavior mock di sini
+	mockRepo.On("FindByID", "123").Return(&entity.User{ID: "123", Name: "Mock User"}, nil)
+
+	req, _ := http.NewRequest("GET", "/api/users/123", nil)
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("expected 200 OK, got %d", rr.Code)
+	}
+
+	userRepo.AssertExpectations(t)
+}
