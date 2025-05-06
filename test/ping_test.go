@@ -43,7 +43,7 @@ func TestBasicAuthentication(t *testing.T) {
 		base64           string
 		expectedHttpCode int
 	}{
-		{name: "Valid Base64", base64: "YWRpbnVsOmFkaW51bDEyMw==", expectedHttpCode: http.StatusOK},
+		{name: "Valid Base64", base64: "YXJ5YTphcnlhMTIz", expectedHttpCode: http.StatusOK},
 		{name: "Invalid Base64", base64: "Invalid Base64", expectedHttpCode: http.StatusUnauthorized},
 	}
 	for _, test := range tests {

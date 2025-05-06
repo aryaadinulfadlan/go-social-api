@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_social
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: arya
+      DB_PASSWORD: root
+      DB_NAME: go_social
+      REDIS_ADDR: redis:6379
+    ports:
+      - "4000:4000"
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:16.4
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: arya
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: go_social
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7.2.8
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - app_network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  app_network:
+    driver: bridge

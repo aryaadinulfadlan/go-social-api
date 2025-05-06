@@ -1,3 +1,2 @@
-/bin
 .env
 gorm_test.go
