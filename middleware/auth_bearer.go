@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/user"
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
-	"github.com/aryaadinulfadlan/go-social-api/internal/user"
 	"github.com/google/uuid"
 )
 

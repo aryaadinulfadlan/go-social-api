@@ -14,15 +14,15 @@ import (
 func TestRateLimiter(t *testing.T) {
 	router := SetupTest()
 	tests := []struct {
-		name           string
-		expectedStatus int
+		name             string
+		expectedHttpCode int
 	}{
-		{name: "OK", expectedStatus: http.StatusOK},
-		{name: "OK", expectedStatus: http.StatusOK},
-		{name: "OK", expectedStatus: http.StatusOK},
-		{name: "OK", expectedStatus: http.StatusOK},
-		{name: "OK", expectedStatus: http.StatusOK},
-		{name: "Too Many Request", expectedStatus: http.StatusTooManyRequests},
+		{name: "OK", expectedHttpCode: http.StatusOK},
+		{name: "OK", expectedHttpCode: http.StatusOK},
+		{name: "OK", expectedHttpCode: http.StatusOK},
+		{name: "OK", expectedHttpCode: http.StatusOK},
+		{name: "OK", expectedHttpCode: http.StatusOK},
+		{name: "Too Many Request", expectedHttpCode: http.StatusTooManyRequests},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestRateLimiter(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			router.ServeHTTP(recorder, request)
 			response := recorder.Result()
-			assert.Equal(t, test.expectedStatus, response.StatusCode)
+			assert.Equal(t, test.expectedHttpCode, response.StatusCode)
 		})
 	}
 }
@@ -39,12 +39,12 @@ func TestBasicAuthentication(t *testing.T) {
 	time.Sleep(time.Second) // TO PREVENT RATE LIMITING
 	router := SetupTest()
 	tests := []struct {
-		name           string
-		base64         string
-		expectedStatus int
+		name             string
+		base64           string
+		expectedHttpCode int
 	}{
-		{name: "Valid Base64", base64: "YWRpbnVsOmFkaW51bDEyMw==", expectedStatus: http.StatusOK},
-		{name: "Invalid Base64", base64: "Invalid Base64", expectedStatus: http.StatusUnauthorized},
+		{name: "Valid Base64", base64: "YWRpbnVsOmFkaW51bDEyMw==", expectedHttpCode: http.StatusOK},
+		{name: "Invalid Base64", base64: "Invalid Base64", expectedHttpCode: http.StatusUnauthorized},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestBasicAuthentication(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			router.ServeHTTP(recorder, request)
 			response := recorder.Result()
-			assert.Equal(t, test.expectedStatus, response.StatusCode)
+			assert.Equal(t, test.expectedHttpCode, response.StatusCode)
 		})
 	}
 }
@@ -64,12 +64,12 @@ func TestBearerAuthentication(t *testing.T) {
 	user_id, _ := uuid.Parse("e1b4e485-fa48-4d59-8758-e7f988d5cc17")
 	token, _ := GenerateJWT(user_id.String())
 	tests := []struct {
-		name           string
-		token          string
-		expectedStatus int
+		name             string
+		token            string
+		expectedHttpCode int
 	}{
-		{name: "Valid Token", token: token, expectedStatus: http.StatusOK},
-		{name: "Invalid Token", token: "Invalid Token", expectedStatus: http.StatusUnauthorized},
+		{name: "Valid Token", token: token, expectedHttpCode: http.StatusOK},
+		{name: "Invalid Token", token: "Invalid Token", expectedHttpCode: http.StatusUnauthorized},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestBearerAuthentication(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			router.ServeHTTP(recorder, request)
 			response := recorder.Result()
-			assert.Equal(t, test.expectedStatus, response.StatusCode)
+			assert.Equal(t, test.expectedHttpCode, response.StatusCode)
 		})
 	}
 }

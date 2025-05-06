@@ -4,18 +4,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/comment"
+	"github.com/aryaadinulfadlan/go-social-api/entity/permission"
+	"github.com/aryaadinulfadlan/go-social-api/entity/post"
+	"github.com/aryaadinulfadlan/go-social-api/entity/role"
+	"github.com/aryaadinulfadlan/go-social-api/entity/user"
+	userinvitation "github.com/aryaadinulfadlan/go-social-api/entity/user_invitation"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
-	"github.com/aryaadinulfadlan/go-social-api/internal/comment"
 	"github.com/aryaadinulfadlan/go-social-api/internal/config"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
-	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
-	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/redis"
-	"github.com/aryaadinulfadlan/go-social-api/internal/role"
 	"github.com/aryaadinulfadlan/go-social-api/internal/router"
-	"github.com/aryaadinulfadlan/go-social-api/internal/user"
-	userinvitation "github.com/aryaadinulfadlan/go-social-api/internal/user_invitation"
 )
 
 func main() {

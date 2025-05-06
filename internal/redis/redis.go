@@ -26,6 +26,6 @@ func Init() {
 
 	_, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
-		logger.Logger.Fatal("failed to connect to Redis: " + err.Error())
+		logger.Logger.Fatal("failed connect to Redis: " + err.Error())
 	}
 }

@@ -3,9 +3,9 @@ package middleware
 import (
 	"context"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/user"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/aryaadinulfadlan/go-social-api/internal/redis"
-	"github.com/aryaadinulfadlan/go-social-api/internal/user"
 	"github.com/google/uuid"
 )
 

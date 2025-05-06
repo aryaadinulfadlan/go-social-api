@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/permission"
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
-	"github.com/aryaadinulfadlan/go-social-api/internal/permission"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/google/uuid"
 )

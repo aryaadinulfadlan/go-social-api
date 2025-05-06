@@ -3,8 +3,8 @@ package comment
 import (
 	"context"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
-	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/google/uuid"
 )
 

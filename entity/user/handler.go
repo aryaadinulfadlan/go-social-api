@@ -5,9 +5,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/aryaadinulfadlan/go-social-api/entity/post"
 	"github.com/aryaadinulfadlan/go-social-api/helpers"
 	"github.com/aryaadinulfadlan/go-social-api/internal/auth"
-	"github.com/aryaadinulfadlan/go-social-api/internal/post"
 	"github.com/aryaadinulfadlan/go-social-api/internal/shared"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
