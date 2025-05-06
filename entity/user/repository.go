@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repository interface {
@@ -160,8 +161,16 @@ func (repository *RepositoryImplementation) Activate(ctx context.Context, user *
 	return user, nil
 }
 func (repository *RepositoryImplementation) Delete(ctx context.Context, userId uuid.UUID) error {
-	var user *db.User
-	err := repository.gorm.WithContext(ctx).Where("id = ?", userId).Delete(&user).Error
+	err := repository.gorm.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var user *db.User
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", userId).Take(&user).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&user).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}

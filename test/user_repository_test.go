@@ -65,7 +65,10 @@ func TestDeleteUserById(t *testing.T) {
 	repo := user.NewRepository(gormDB)
 	userId, _ := uuid.Parse("50b466de-2de4-4e40-bdec-08270f23a8c8")
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "users" WHERE id = $1`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE id = $1 LIMIT $2 FOR UPDATE`)).
+		WithArgs(userId, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userId))
+	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "users" WHERE "users"."id" = $1`)).
 		WithArgs(userId).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()

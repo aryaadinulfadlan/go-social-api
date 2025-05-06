@@ -6,6 +6,7 @@ import (
 	"github.com/aryaadinulfadlan/go-social-api/internal/db"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repository interface {
@@ -48,21 +49,38 @@ func (repository *RepositoryImplementation) GetById(ctx context.Context, postId 
 	return &post, nil
 }
 func (repository *RepositoryImplementation) Update(ctx context.Context, post *db.Post) (*db.Post, error) {
-	err := repository.gorm.WithContext(ctx).Model(&db.Post{}).
-		Where("id = ?", post.Id).
-		Updates(db.Post{
-			Title:   post.Title,
-			Content: post.Content,
-			Tags:    post.Tags,
-		}).Error
+	err := repository.gorm.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var existingPost db.Post
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", post.Id).
+			Take(&existingPost).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&db.Post{}).Where("id = ?", post.Id).
+			Updates(db.Post{
+				Title:   post.Title,
+				Content: post.Content,
+				Tags:    post.Tags,
+			}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 	return post, nil
 }
 func (repository *RepositoryImplementation) Delete(ctx context.Context, postId uuid.UUID) error {
-	var post db.Post
-	err := repository.gorm.WithContext(ctx).Where("id = ?", postId).Delete(&post).Error
+	err := repository.gorm.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var post db.Post
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", postId).Take(&post).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&post).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
