@@ -15,10 +15,12 @@ const UserExpiredTime = time.Hour * 2
 
 func Init() {
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     config.Redis.Addr,
-		Password: config.Redis.Password,
-		DB:       config.Redis.DB,
-		Protocol: config.Redis.Protocol,
+		Addr: config.Redis.Addr,
+		DB:   config.Redis.DB,
+		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
+			logger.Logger.Infof("New Redis connection established: %s", cn.String())
+			return nil
+		},
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
