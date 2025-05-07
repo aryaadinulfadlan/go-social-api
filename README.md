@@ -72,6 +72,7 @@ There are two ways to run this application: using Docker (recommended for easy s
 > This is the easiest way to get the app running. It uses Docker and Docker Compose to set up everything automatically.
 
 **1. Ensure Docker and Docker Compose are installed** on your machine.
+
 **2. Clone the repository**:
 
 ```bash
@@ -85,7 +86,7 @@ $ cd go-social-api
 $ docker-compose up --build
 ```
 
-**4. Once the app is successfully built, run the database migration:**
+**4. Once the app is successfully built and running, run the database migration:**
 
 ```bash
 $ docker-compose run --rm migrate
@@ -111,6 +112,7 @@ $ git checkout local
 ```
 
 **3. Make sure PostgreSQL is running on your local machine.**
+
 **4. Start Redis on your local machine:**
 
 ```bash
@@ -125,8 +127,11 @@ $ ping
 ```
 
 If it returns PONG, it means you're successfully connected to Redis.
+
 **6. Adjust the database URL in the `.env `file to match your own**
-**7. Create a new database on your machine**
+
+**7. Create a new database on your machine named `go_social`**
+
 **8. I am using `golang-migrate`, you can choose your own. Run the database migration:**
 
 ```bash
