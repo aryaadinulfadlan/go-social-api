@@ -1,11 +1,10 @@
 package env
 
 import (
-	"github.com/aryaadinulfadlan/go-social-api/internal/logger"
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type EnvConfig struct {
 	ADDR                  string
 	DATABASE_URL          string
 	DB_MAX_OPEN_CONNS     int
@@ -15,9 +14,7 @@ type Config struct {
 	AUTH_BASIC_USERNAME   string
 	AUTH_BASIC_PASSWORD   string
 	REDIS_ADDR            string
-	REDIS_PASSWORD        string
 	REDIS_DB              int
-	REDIS_PROTOCOL        int
 	RATE_LIMITER_MAX      int
 	RATE_LIMITER_DURATION string
 	RATE_LIMITER_ENABLED  bool
@@ -25,32 +22,21 @@ type Config struct {
 
 var Envs = GetEnv()
 
-func GetEnv() Config {
-	config := viper.New()
-	config.SetConfigName(".env")
-	config.SetConfigType("env")
-	config.AddConfigPath(".")
-	config.AddConfigPath("..")
-	config.AddConfigPath("../../")
-	err := config.ReadInConfig()
-	if err != nil {
-		logger.Logger.Fatalln("Cannot load env file:", err)
-	}
-	return Config{
-		ADDR:                  config.GetString("ADDR"),
-		DATABASE_URL:          config.GetString("DATABASE_URL"),
-		DB_MAX_OPEN_CONNS:     config.GetInt("DB_MAX_OPEN_CONNS"),
-		DB_MAX_IDLE_CONNS:     config.GetInt("DB_MAX_IDLE_CONNS"),
-		DB_MAX_IDLE_TIME:      config.GetString("DB_MAX_IDLE_TIME"),
-		SECRET_KEY:            config.GetString("SECRET_KEY"),
-		AUTH_BASIC_USERNAME:   config.GetString("AUTH_BASIC_USERNAME"),
-		AUTH_BASIC_PASSWORD:   config.GetString("AUTH_BASIC_PASSWORD"),
-		REDIS_ADDR:            config.GetString("REDIS_ADDR"),
-		REDIS_PASSWORD:        config.GetString("REDIS_PASSWORD"),
-		REDIS_DB:              config.GetInt("REDIS_DB"),
-		REDIS_PROTOCOL:        config.GetInt("REDIS_PROTOCOL"),
-		RATE_LIMITER_MAX:      config.GetInt("RATE_LIMITER_MAX"),
-		RATE_LIMITER_DURATION: config.GetString("RATE_LIMITER_DURATION"),
-		RATE_LIMITER_ENABLED:  config.GetBool("RATE_LIMITER_ENABLED"),
+func GetEnv() EnvConfig {
+	viper.AutomaticEnv()
+	return EnvConfig{
+		ADDR:                  viper.GetString("ADDR"),
+		DATABASE_URL:          viper.GetString("DATABASE_URL"),
+		DB_MAX_OPEN_CONNS:     viper.GetInt("DB_MAX_OPEN_CONNS"),
+		DB_MAX_IDLE_CONNS:     viper.GetInt("DB_MAX_IDLE_CONNS"),
+		DB_MAX_IDLE_TIME:      viper.GetString("DB_MAX_IDLE_TIME"),
+		SECRET_KEY:            viper.GetString("SECRET_KEY"),
+		AUTH_BASIC_USERNAME:   viper.GetString("AUTH_BASIC_USERNAME"),
+		AUTH_BASIC_PASSWORD:   viper.GetString("AUTH_BASIC_PASSWORD"),
+		REDIS_ADDR:            viper.GetString("REDIS_ADDR"),
+		REDIS_DB:              viper.GetInt("REDIS_DB"),
+		RATE_LIMITER_MAX:      viper.GetInt("RATE_LIMITER_MAX"),
+		RATE_LIMITER_DURATION: viper.GetString("RATE_LIMITER_DURATION"),
+		RATE_LIMITER_ENABLED:  viper.GetBool("RATE_LIMITER_ENABLED"),
 	}
 }

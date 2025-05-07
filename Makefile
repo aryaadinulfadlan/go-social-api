@@ -1,5 +1,5 @@
-include .env
 MIGRATIONS_PATH = internal/db/migrations
+DATABASE_URL = postgres://postgres:root@postgres:5432/go_social?sslmode=disable
 
 migration:
 	migrate create -ext sql -dir $(MIGRATIONS_PATH) $(filter-out $@,$(MAKECMDGOALS))
