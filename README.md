@@ -2,6 +2,16 @@
 
 A scalable and modular REST API built with Go using a clean architecture pattern (Handler → Service → Repository). This application demonstrates CRUD functionality and follows best practices for structuring Go web applications.
 
+- [🧠 Application Overview](#-application-overview)
+- [🚀 Features](#-features)
+- [🛠️ Tech Stack](#-tech-stack)
+- [🧰 How to Run the Application](#-how-to-run-the-application)
+- [📌 API Documentation](#-api-documentation)
+- [🔐 Authentication](#-authentication)
+- [🔐 Authorization](#-authorization)
+- [🧪 Testing](#-testing)
+- [🗂️ Project Structure](#-project-structure)
+
 ---
 
 ## 🧠 Application Overview
@@ -293,6 +303,17 @@ This application implements **role-based access control** with two user types:
 - **Regular User**
 
 Each user type has specific access rights to certain API endpoints.
+Here are the accounts you can use to log in to this application:
+
+- **Princess Diana (Admin User):**
+  - Email: `princess_diana@gmail.com`
+  - Password: `diana123`
+- **Clark Kent (Regular User):**
+  - Email: `clark_kent@gmail.com`
+  - Password: `clark123`
+- **Bruce Wayne (Regular User):**
+  - Email: `bruce_wayne@gmail.com`
+  - Password: `bruce123`
 
 #### 👤 Regular User
 
