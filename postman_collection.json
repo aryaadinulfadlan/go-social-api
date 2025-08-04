@@ -1,0 +1,560 @@
+{
+	"info": {
+		"_postman_id": "a79409e0-ffd2-460a-a351-ffc9366ac037",
+		"name": "Go Restful API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8562125"
+	},
+	"item": [
+		{
+			"name": "Post",
+			"item": [
+				{
+					"name": "Post Detail",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1OTY2NzgsImlhdCI6MTc0NjU4OTQ3OCwibmJmIjoxNzQ2NTg5NDc4LCJzdWIiOiJlMWI0ZTQ4NS1mYTQ4LTRkNTktODc1OC1lN2Y5ODhkNWNjMTcifQ.HU_UW6DSzBa3dTSW7agDtvGlGrnn-JG-t28-A6Y6Plk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/posts/db5d4c6c-15d5-4555-89ad-555c7f0e4cf9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"posts",
+								"db5d4c6c-15d5-4555-89ad-555c7f0e4cf9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1MDcyMzIsImlhdCI6MTc0NjUwMDAzMiwibmJmIjoxNzQ2NTAwMDMyLCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ.PcQf8hV8yYQX5-xjbXqlAZbii11RzAcLMSr5fve0NGI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"joko\",\n    \"content\": \"clark byy\",\n    \"tags\": [\"joko\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/posts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Update",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1MTc5MTcsImlhdCI6MTc0NjUxMDcxNywibmJmIjoxNzQ2NTEwNzE3LCJzdWIiOiJlMWI0ZTQ4NS1mYTQ4LTRkNTktODc1OC1lN2Y5ODhkNWNjMTcifQ.SgUM7SM2sUS9_dLj_c2RorDY_epBXLkYqQ6sVIh0qMQ",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Clark First upd\",\n    \"content\": \"clark content here\",\n    \"tags\": [\"clark-wayne\", \"first\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/posts/db5d4c6c-15d5-4555-89ad-555c7f0e4cf9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"posts",
+								"db5d4c6c-15d5-4555-89ad-555c7f0e4cf9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Delete",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5OTI0NDUsImlhdCI6MTc0NTk4NTI0NSwibmJmIjoxNzQ1OTg1MjQ1LCJzdWIiOiJlMWI0ZTQ4NS1mYTQ4LTRkNTktODc1OC1lN2Y5ODhkNWNjMTcifQ.LdK-cPvKTVGFtoKPhbCFItZsjZyPnmo97cELyeppc7g",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/posts/8529e9cb-b30e-4f74-aed8-7469bb2de48c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"posts",
+								"8529e9cb-b30e-4f74-aed8-7469bb2de48c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "User Feed",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTQzMDg4OTAsImlhdCI6MTc1NDMwMTY5MCwibmJmIjoxNzU0MzAxNjkwLCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ._sBAo91LHMfjk-iMYXUgQieM_IRV_rz7-meiWuJcl0E",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/users/feed?tags=second",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"users",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "3",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "i",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "second"
+								},
+								{
+									"key": "since",
+									"value": "2025-04-11",
+									"disabled": true
+								},
+								{
+									"key": "until",
+									"value": "2025-04-10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI3NDUxNzIsImlhdCI6MTc1MjczNzk3MiwibmJmIjoxNzUyNzM3OTcyLCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ.AM60LFksXzzO3Qp1mBLw9dLCNCs7Wb0oFu-P1lsTm9s",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/users/e1b4e485-fa48-4d59-8758-e7f988d5cc17",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"users",
+								"e1b4e485-fa48-4d59-8758-e7f988d5cc17"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Follow / Unfollow",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5Nzk5NzksImlhdCI6MTc0NTk3Mjc3OSwibmJmIjoxNzQ1OTcyNzc5LCJzdWIiOiJlMWI0ZTQ4NS1mYTQ4LTRkNTktODc1OC1lN2Y5ODhkNWNjMTcifQ.red7BjJZ2P2HQgiW4zx8Bvj66rH5K9mVR3oR6ndz-F8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_sender_id\": \"030e656e-cc3e-47f3-813a-33a3d50b5373\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/users/4c176d2e-787f-44c0-a578-c5c6d15503bc/follow",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"users",
+								"4c176d2e-787f-44c0-a578-c5c6d15503bc",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"assad\",\n    \"username\": \"clark_kents\",\n    \"email\": \"clark_kent@gmail.coms\",\n    \"password\": \"adinul12\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/auth/sign-up",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"auth",
+								"sign-up"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Connections",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI2NjAyMTMsImlhdCI6MTc1MjY1MzAxMywibmJmIjoxNzUyNjUzMDEzLCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ.p8ggUq2jlcHoXi1c08A0Mslw4-t3rDBlWujFbnhqhJ8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/users/4c176d2e-787f-44c0-a578-c5c6d15503bb/followers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"users",
+								"4c176d2e-787f-44c0-a578-c5c6d15503bb",
+								"followers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Activate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/v1/auth/activate/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5ODExNDIsImlhdCI6MTc0NTk3Mzk0MiwibmJmIjoxNzQ1OTczOTQyLCJzdWIiOiIzMTIxNzhmYy1iMmUwLTQzMzEtOTdjNS01NDc0NTBlNjFhM2UifQ.cPlx_tbFC8OmEtNQIvDMFaLCrEtotb43meQkxfScJXU",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"auth",
+								"activate",
+								"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5ODExNDIsImlhdCI6MTc0NTk3Mzk0MiwibmJmIjoxNzQ1OTczOTQyLCJzdWIiOiIzMTIxNzhmYy1iMmUwLTQzMzEtOTdjNS01NDc0NTBlNjFhM2UifQ.cPlx_tbFC8OmEtNQIvDMFaLCrEtotb43meQkxfScJXU"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Delete",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1MTc5MTcsImlhdCI6MTc0NjUxMDcxNywibmJmIjoxNzQ2NTEwNzE3LCJzdWIiOiJlMWI0ZTQ4NS1mYTQ4LTRkNTktODc1OC1lN2Y5ODhkNWNjMTcifQ.SgUM7SM2sUS9_dLj_c2RorDY_epBXLkYqQ6sVIh0qMQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/v1/users/cc0df4d0-185b-4536-bc86-aeb8d7728e0a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"users",
+								"cc0df4d0-185b-4536-bc86-aeb8d7728e0a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"clark_kent@gmail.com\",\n    \"password\": \"clark123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/auth/sign-in",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"auth",
+								"sign-in"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Resend Activation Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"clark_kent@gmail.coms\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/auth/resend-activation",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"auth",
+								"resend-activation"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comment",
+			"item": [
+				{
+					"name": "Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5OTY4NTYsImlhdCI6MTc0NTk4OTY1NiwibmJmIjoxNzQ1OTg5NjU2LCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ.AN6wuq2YYjj4PMIQP1psE3vl03NO_7xCqTcvBfqbH5U",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"clark again\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/v1/comments/07112266-83d1-408f-bd19-ec4b80f760a0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"comments",
+								"07112266-83d1-408f-bd19-ec4b80f760a0"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ping",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YXJ5YTphcnlhMTIz",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4000/v1/basic",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"v1",
+						"basic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bearer",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTQzMDg4OTAsImlhdCI6MTc1NDMwMTY5MCwibmJmIjoxNzU0MzAxNjkwLCJzdWIiOiI1MGI0NjZkZS0yZGU0LTRlNDAtYmRlYy0wODI3MGYyM2E4YzgifQ._sBAo91LHMfjk-iMYXUgQieM_IRV_rz7-meiWuJcl0E",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4000/v1/bearer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"v1",
+						"bearer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
