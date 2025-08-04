@@ -150,6 +150,7 @@ $ go run ./cmd/server/
 
 ## 📌 API Documentation
 
+**Please see the postman_collection.json file for complete endpoint definitions and sample data.**
 This section outlines the available API endpoints, including request parameters, request body, authentication requirements, and response formats.
 
 #### 🔓 Unauthenticated Endpoints
